@@ -1,0 +1,141 @@
+/*
+  paper-theme.css — زبان بصری مشترک بازی‌های روایت‌محور «شهر ابزار مالی»
+  -----------------------------------------------------------------------
+  فقط چیزهایی که در هر بازی روایت‌محور یکسان است: پس‌زمینه‌ی کاغذی، متر،
+  نقطه‌های پیشرفت، صحنه‌ها، دکمه‌ها، نمودار چرخه‌ای. کلاس‌های مخصوص یک بازی
+  (مثلاً .headline یا .round-stage) اینجا نیستند — در game-style.css خودِ
+  همان بازی می‌مانند.
+*/
+:root{
+  --paper:#F1ECDD; --paper-dim:#E7E0CC;
+  --ink:#23273A; --ink-soft:#4B4A5C;
+  --warm:#C1503D; --warm-2:#D9973B;
+  --cool:#3F7767; --cool-2:#5A8FA8;
+  --pencil:#837C68;
+  --gold:#B8813F;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:'Vazirmatn',sans-serif; line-height:1.85;
+  background-image:radial-gradient(rgba(35,39,58,0.035) 1px, transparent 1px);
+  background-size:14px 14px;
+  display:flex; flex-direction:column; min-height:100vh;
+}
+h1,h2,h3{font-weight:800; margin:0 0 .5em;}
+p{margin:0 0 1em;}
+.app{max-width:640px; margin:0 auto; width:100%; padding:1rem 1.2rem 1.4rem; flex:1; display:flex; flex-direction:column;}
+
+.back{ display:inline-block; font-size:.8rem; font-weight:600; color:var(--ink-soft); text-decoration:none; margin-bottom:.6rem; }
+.back:hover{ color:var(--warm); }
+
+/* متر بالای صفحه */
+.meter-wrap{margin:.4rem 0 .7rem;}
+.meter-labels{display:flex; justify-content:space-between; font-size:.82rem; color:var(--ink-soft); margin-bottom:.3rem;}
+.meter-bar{position:relative; height:20px; border-radius:12px; overflow:hidden; background:var(--paper-dim);}
+.meter-fill{position:absolute; top:0; bottom:0; right:0; width:50%; transition:width .6s cubic-bezier(.2,.8,.2,1);}
+.meter-tag{text-align:center; font-size:.78rem; color:var(--pencil); margin-top:.25rem; display:flex; justify-content:space-between;}
+.coin-chip{
+  display:inline-flex; align-items:center; gap:.3rem; background:var(--paper-dim);
+  border-radius:20px; padding:.15rem .7rem; font-weight:700; font-size:.8rem; color:var(--gold);
+}
+
+/* نقطه‌های پیشرفت */
+.dots{display:flex; justify-content:center; gap:.4rem; margin-bottom:.6rem; flex-wrap:wrap;}
+.dot{width:8px; height:8px; border-radius:50%; background:var(--paper-dim); border:1.5px solid var(--pencil);}
+.dot.done{background:var(--cool);}
+.dot.active{background:var(--warm); transform:scale(1.3);}
+
+/* صحنه‌ها */
+.stage{position:relative; flex:1; display:flex; align-items:stretch;}
+.scene{
+  display:none; flex-direction:column; width:100%;
+  background:var(--paper-dim); border-radius:22px 6px 22px 6px;
+  padding:1.4rem 1.4rem 1.6rem; animation:pop .45s cubic-bezier(.2,.8,.2,1);
+}
+.scene.active{display:flex;}
+@keyframes pop{ from{opacity:0; transform:translateY(14px) scale(.98);} to{opacity:1; transform:none;} }
+
+h2.scene-title{font-size:1.2rem; text-align:center;}
+.scene-sub{text-align:center; color:var(--ink-soft); font-size:.9rem; margin-bottom:.4rem;}
+.caption{font-size:.85rem; color:var(--ink-soft); text-align:center; margin-top:.5rem;}
+
+/* دکمه‌ها */
+.btn{
+  font-family:inherit; font-weight:700; font-size:.98rem;
+  padding:.6rem 1.4rem; background:var(--ink); color:var(--paper);
+  border:none; border-radius:18px 6px 18px 6px; cursor:pointer;
+}
+.btn:disabled{opacity:.4; cursor:default;}
+.btn.ghost{background:transparent; color:var(--ink); border:2px solid var(--ink);}
+.btn.warm{background:var(--warm);}
+.btn.cool{background:var(--cool);}
+.row-center{display:flex; justify-content:center; gap:.7rem; flex-wrap:wrap; margin-top:.8rem;}
+
+.char-row{display:flex; justify-content:center; gap:1rem; margin:.6rem 0;}
+.char-row svg{width:110px; height:110px;}
+
+/* نمودار چرخه‌ای کلیک‌پذیر — الگوی مشترک همه‌ی بازی‌ها */
+.cycle-wrap{position:relative; max-width:300px; margin:1rem auto 0; aspect-ratio:1/1;}
+.cycle-wrap svg.arrows{position:absolute; inset:0; width:100%; height:100%;}
+.cycle-node{position:absolute; transform:translate(-50%,-50%); width:44%; text-align:center; cursor:pointer; z-index:2;}
+.cycle-node .pt{width:13px; height:13px; border-radius:50%; background:var(--warm); margin:0 auto .35rem; transition:transform .2s;}
+.cycle-node.seen .pt{background:var(--cool);}
+.cycle-node p{font-size:.76rem; font-weight:700; margin:0;}
+.cycle-node:hover .pt{transform:scale(1.3);}
+.cycle-detail{min-height:2.6rem; text-align:center; font-size:.86rem; color:var(--ink-soft); background:var(--paper); border-radius:10px; padding:.5rem .8rem; margin-top:.6rem;}
+
+/* اسلایدر «چه می‌شد اگر» — الگوی مشترک */
+input[type=range]{width:100%; margin:.6rem 0; accent-color:var(--warm);}
+.slider-value{text-align:center; font-weight:700; color:var(--warm);}
+.friction-bar-wrap{margin-top:1rem;}
+.friction-bar{height:14px; border-radius:8px; background:var(--paper); overflow:hidden;}
+.friction-fill{height:100%; width:50%; transition:width .5s;}
+.friction-label{text-align:center; font-size:.85rem; color:var(--ink-soft); margin-top:.3rem;}
+
+/* کاربرد در زندگی واقعی — الگوی مشترک */
+.try-real{background:var(--paper); border-radius:14px; padding:1rem; margin-top:.6rem;}
+.try-real p{font-size:.88rem; margin-bottom:.5rem; text-align:center;}
+.try-real input{width:100%; padding:.6rem .8rem; border-radius:10px; border:2px solid var(--pencil); background:#fff; font-family:inherit; font-size:.92rem; margin-bottom:.6rem;}
+.real-suggestion{margin-top:.7rem; font-size:.87rem; color:var(--cool); font-weight:600; text-align:center; display:none;}
+.real-suggestion.show{display:block;}
+
+/* جمع‌بندی پایانی — الگوی مشترک */
+.result-tag{background:var(--paper); border-radius:12px; padding:.8rem 1rem; font-size:.9rem; font-weight:600; text-align:center; margin-top:.6rem;}
+.summary-list{list-style:none; padding:0; margin:1rem 0 0;}
+.summary-list li{background:var(--paper); border-radius:10px; padding:.6rem .9rem; margin-bottom:.5rem; font-size:.86rem; font-weight:600; display:flex; align-items:center; gap:.5rem;}
+.summary-list li .chk{color:var(--cool); font-weight:900;}
+
+.nav-buttons{display:flex; justify-content:space-between; margin-top:1rem; gap:.6rem;}
+.nav-buttons .btn{flex:1;}
+.next-hint{font-size:.8rem; color:var(--pencil); text-align:center; margin-top:1rem;}
+
+@media (max-width:420px){ .reveal-bars{gap:1.2rem;} }
+
+/* عدد قابل‌کشیدن (Tangle-lite) — مشترک بین همه‌ی بازی‌ها */
+.tangle-num{
+  display:inline-block; font-weight:800; color:var(--warm);
+  border-bottom:2px dashed var(--warm); cursor:ew-resize; padding:0 .1rem;
+  user-select:none; touch-action:none;
+}
+.tangle-num.dragging{ color:var(--gold); border-color:var(--gold); }
+.tangle-output{ font-weight:800; color:var(--cool); }
+.tangle-para{
+  background:var(--paper); border-radius:14px; padding:1rem 1.1rem;
+  font-size:1rem; line-height:2.1; text-align:center;
+}
+
+/* کارت‌های معرفی شخصیت — مشترک بین بازی‌هایی که چند شخصیت را کنار هم معرفی می‌کنند */
+.char-intro-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem; margin-top:.6rem;}
+.char-intro-grid.cols-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width:520px){ .char-intro-grid{grid-template-columns:1fr 1fr;} }
+.char-card{background:var(--paper); border-radius:14px 4px 14px 4px; padding:.8rem .6rem; text-align:center;}
+.char-card svg{width:100%; max-width:100px; aspect-ratio:1/1;}
+.char-card h3{font-size:.9rem; margin:.3rem 0 .3rem;}
+.char-card p{font-size:.75rem; color:var(--ink-soft); margin:0;}
+
+/* دکمه‌های حدسِ چندگزینه‌ای — مشترک بین بازی‌هایی که پیش‌بینی گسسته می‌گیرند */
+.guess-choice-row{ display:flex; gap:.6rem; justify-content:center; flex-wrap:wrap; margin-top:.8rem; }
+.guess-choice-row .btn{ min-width:100px; }
+.guess-choice-row .btn.selected{ background:var(--gold); }

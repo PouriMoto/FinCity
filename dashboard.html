@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شهر ابزار مالی · بازی‌های مالی</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+<style>
+  :root{
+    --bg-1:#0c1526; --bg-2:#16223b;
+    --card:#faf5e8; --ink:#211a10; --ink-soft:#5c5240;
+    --line:#ddd0ab; --gold:#c1922f; --gold-deep:#8a6a1f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    min-height:100vh; display:flex; justify-content:center; align-items:flex-start;
+    background:
+      radial-gradient(circle at 15% 10%, #1c2c4c 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, #1a2740 0%, transparent 50%),
+      linear-gradient(160deg, var(--bg-1), var(--bg-2));
+    font-family:'Vazirmatn', Tahoma, system-ui, sans-serif;
+    color:var(--ink); padding:2.5rem 1rem;
+  }
+  .wrap{ width:100%; max-width:960px; }
+  .intro{ text-align:center; margin-bottom:2rem; }
+  .intro h1{ color:#f4e7c8; font-size:1.7rem; font-weight:800; margin-bottom:.6rem; }
+  .intro p{ color:#b9c2d6; font-size:.95rem; max-width:34rem; margin:0 auto; line-height:1.8; }
+
+  .grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;
+  }
+  .game-card{
+    background:var(--card);
+    border-radius:22px;
+    padding:1.5rem 1.4rem;
+    text-decoration:none; color:var(--ink);
+    box-shadow:0 20px 40px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.4) inset;
+    border:1px solid rgba(255,255,255,.5);
+    display:flex; flex-direction:column; gap:.5rem;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .game-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 26px 48px rgba(0,0,0,.42), 0 1px 0 rgba(255,255,255,.4) inset;
+  }
+  .game-emoji{ font-size:2rem; }
+  .game-title{ font-size:1.1rem; font-weight:800; }
+  .game-desc{ font-size:.85rem; color:var(--ink-soft); line-height:1.7; }
+  .game-tag{
+    display:inline-block; align-self:flex-start; margin-top:.3rem;
+    background:#efe6cf; color:var(--gold-deep); font-size:.72rem; font-weight:700;
+    padding:.2rem .7rem; border-radius:20px;
+  }
+  .game-card.soon{
+    opacity:.6; cursor:default; pointer-events:none;
+  }
+  .game-card.soon .game-tag{
+    background:transparent; border:1.5px dashed var(--ink-soft); color:var(--ink-soft);
+  }
+
+  .footnote{
+    text-align:center; color:#8b96ad; font-size:.8rem; line-height:1.8; margin-top:2rem; max-width:34rem; margin-inline:auto;
+  }
+
+  @media (max-width:640px){
+    .grid{ grid-template-columns:1fr; }
+    .intro h1{ font-size:1.35rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="intro">
+    <h1>🏙️ شهر ابزار مالی</h1>
+    <p>چند بازی کوتاه برای اینکه مفاهیم مالی رو با تجربه‌کردن یاد بگیری، نه فقط خوندن. هر بازی چند دقیقه‌ست و نتیجه رو بلافاصله می‌بینی.</p>
+  </div>
+
+  <div class="grid">
+    <a class="game-card" href="games/compound-gold/index.html">
+      <div class="game-emoji">🗄️</div>
+      <div class="game-title">دفترچه‌ی فراموش‌شده</div>
+      <div class="game-desc">تو کشوی مادربزرگ یه دفترچه‌ی بانکی قدیمی پیدا می‌کنی. قبل از باز کردنش، حدس بزن این پول الان چقدر می‌ارزه — و چرا بهره مرکب همیشه آهسته شروع می‌شه.</div>
+      <span class="game-tag">بازی روایت‌محور ۱۰ دقیقه‌ای</span>
+    </a>
+
+    <a class="game-card" href="games/inflation/index.html">
+      <div class="game-emoji">🚪</div>
+      <div class="game-title">در بسته‌ی همسایه</div>
+      <div class="game-desc">یه همسایه بود که در خونه‌ش هیچ‌وقت باز نمی‌شد. بعد از فوتش، یه جعبه‌ی پر از پول پیدا می‌کنن — ولی این پول از کِی اونجا بوده؟</div>
+      <span class="game-tag">بازی روایت‌محور ۱۰ دقیقه‌ای</span>
+    </a>
+
+    <a class="game-card" href="games/race/index.html">
+      <div class="game-emoji">📜</div>
+      <div class="game-title">وصیت‌نامه</div>
+      <div class="game-desc">پدربزرگ ارثش رو مساوی بین ۴ نوه تقسیم کرد، ولی هرکدوم یه‌جور خرجش کردن. ۱۰ سال بعد، حدس بزن کدومشون پول‌دارتره.</div>
+      <span class="game-tag">بازی روایت‌محور ۱۰ دقیقه‌ای</span>
+    </a>
+
+    <a class="game-card" href="games/trading/index.html">
+      <div class="game-emoji">📞</div>
+      <div class="game-title">تماس ساعت ۹</div>
+      <div class="game-desc">یه شماره‌ی ناشناس زنگ می‌زنه: یه حساب خانوادگی امروز فعال شده. نمودار خودش جلو می‌ره — تصمیم با خودته.</div>
+      <span class="game-tag">بازی روایت‌محور ۱۰ دقیقه‌ای</span>
+    </a>
+
+    <a class="game-card" href="games/trust-square/index.html">
+      <div class="game-emoji">🤝</div>
+      <div class="game-title">میدان اعتماد</div>
+      <div class="game-desc">با ۳ نوع شریک معامله بازی کن — صادق همیشگی، کلاه‌بردار همیشگی، و تکرارگر — و ببین چرا اعتماد بلندمدت از سود کوتاه‌مدت باارزش‌تره.</div>
+      <span class="game-tag">بازی روایت‌محور ۱۰ دقیقه‌ای</span>
+    </a>
+
+    <a class="game-card" href="games/confirmation-bias/index.html">
+      <div class="game-emoji">🔍</div>
+      <div class="game-title">سوگیری تاییدی</div>
+      <div class="game-desc">جای یه سرمایه‌گذار تصمیم بگیر کدوم خبرها رو بخونی. در پایان ببین چقدر اطمینانت با واقعیت فاصله داشت.</div>
+      <span class="game-tag">بازی روایت‌محور ۱۰ دقیقه‌ای</span>
+    </a>
+
+    <div class="game-card soon">
+      <div class="game-emoji">☕</div>
+      <div class="game-title">نشتی بودجه</div>
+      <div class="game-desc">خرج‌های کوچیک روزانه که جمع سالانه‌شون آدم رو شوکه می‌کنه.</div>
+      <span class="game-tag">به‌زودی</span>
+    </div>
+
+    <div class="game-card soon">
+      <div class="game-emoji">🌫️</div>
+      <div class="game-title">جنگل سردرگمی</div>
+      <div class="game-desc">تشخیص طرح‌های هرمی و کلاهبرداری‌های مالی رایج.</div>
+      <span class="game-tag">به‌زودی</span>
+    </div>
+
+    <div class="game-card soon">
+      <div class="game-emoji">🏭</div>
+      <div class="game-title">کارخانه</div>
+      <div class="game-desc">جریان نقدی و قیمت‌گذاری برای کارآفرین تازه‌کار.</div>
+      <span class="game-tag">به‌زودی</span>
+    </div>
+
+    <div class="game-card soon">
+      <div class="game-emoji">🏘️</div>
+      <div class="game-title">محله‌ی املاک</div>
+      <div class="game-desc">رهن کامل در برابر اجاره + سرمایه‌گذاری مابه‌التفاوت.</div>
+      <span class="game-tag">به‌زودی</span>
+    </div>
+  </div>
+
+  <p class="footnote">همه‌ی بازی‌ها شبیه‌سازی آموزشی‌اند و از داده یا پیش‌بینی واقعی بازار استفاده نمی‌کنند؛ هدف، ساختن شهود مالی است نه توصیه سرمایه‌گذاری.</p>
+</div>
+</body>
+</html>

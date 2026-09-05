@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دفترچه‌ی فراموش‌شده · یه رازِ کوچیک تو کشوی مادربزرگ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/*
+  paper-theme.css — زبان بصری مشترک بازی‌های روایت‌محور «شهر ابزار مالی»
+  -----------------------------------------------------------------------
+  فقط چیزهایی که در هر بازی روایت‌محور یکسان است: پس‌زمینه‌ی کاغذی، متر،
+  نقطه‌های پیشرفت، صحنه‌ها، دکمه‌ها، نمودار چرخه‌ای. کلاس‌های مخصوص یک بازی
+  (مثلاً .headline یا .round-stage) اینجا نیستند — در game-style.css خودِ
+  همان بازی می‌مانند.
+*/
+:root{
+  --paper:#F1ECDD; --paper-dim:#E7E0CC;
+  --ink:#23273A; --ink-soft:#4B4A5C;
+  --warm:#C1503D; --warm-2:#D9973B;
+  --cool:#3F7767; --cool-2:#5A8FA8;
+  --pencil:#837C68;
+  --gold:#B8813F;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:'Vazirmatn',sans-serif; line-height:1.85;
+  background-image:radial-gradient(rgba(35,39,58,0.035) 1px, transparent 1px);
+  background-size:14px 14px;
+  display:flex; flex-direction:column; min-height:100vh;
+}
+h1,h2,h3{font-weight:800; margin:0 0 .5em;}
+p{margin:0 0 1em;}
+.app{max-width:640px; margin:0 auto; width:100%; padding:1rem 1.2rem 1.4rem; flex:1; display:flex; flex-direction:column;}
+
+.back{ display:inline-block; font-size:.8rem; font-weight:600; color:var(--ink-soft); text-decoration:none; margin-bottom:.6rem; }
+.back:hover{ color:var(--warm); }
+
+/* متر بالای صفحه */
+.meter-wrap{margin:.4rem 0 .7rem;}
+.meter-labels{display:flex; justify-content:space-between; font-size:.82rem; color:var(--ink-soft); margin-bottom:.3rem;}
+.meter-bar{position:relative; height:20px; border-radius:12px; overflow:hidden; background:var(--paper-dim);}
+.meter-fill{position:absolute; top:0; bottom:0; right:0; width:50%; transition:width .6s cubic-bezier(.2,.8,.2,1);}
+.meter-tag{text-align:center; font-size:.78rem; color:var(--pencil); margin-top:.25rem; display:flex; justify-content:space-between;}
+.coin-chip{
+  display:inline-flex; align-items:center; gap:.3rem; background:var(--paper-dim);
+  border-radius:20px; padding:.15rem .7rem; font-weight:700; font-size:.8rem; color:var(--gold);
+}
+
+/* نقطه‌های پیشرفت */
+.dots{display:flex; justify-content:center; gap:.4rem; margin-bottom:.6rem; flex-wrap:wrap;}
+.dot{width:8px; height:8px; border-radius:50%; background:var(--paper-dim); border:1.5px solid var(--pencil);}
+.dot.done{background:var(--cool);}
+.dot.active{background:var(--warm); transform:scale(1.3);}
+
+/* صحنه‌ها */
+.stage{position:relative; flex:1; display:flex; align-items:stretch;}
+.scene{
+  display:none; flex-direction:column; width:100%;
+  background:var(--paper-dim); border-radius:22px 6px 22px 6px;
+  padding:1.4rem 1.4rem 1.6rem; animation:pop .45s cubic-bezier(.2,.8,.2,1);
+}
+.scene.active{display:flex;}
+@keyframes pop{ from{opacity:0; transform:translateY(14px) scale(.98);} to{opacity:1; transform:none;} }
+
+h2.scene-title{font-size:1.2rem; text-align:center;}
+.scene-sub{text-align:center; color:var(--ink-soft); font-size:.9rem; margin-bottom:.4rem;}
+.caption{font-size:.85rem; color:var(--ink-soft); text-align:center; margin-top:.5rem;}
+
+/* دکمه‌ها */
+.btn{
+  font-family:inherit; font-weight:700; font-size:.98rem;
+  padding:.6rem 1.4rem; background:var(--ink); color:var(--paper);
+  border:none; border-radius:18px 6px 18px 6px; cursor:pointer;
+}
+.btn:disabled{opacity:.4; cursor:default;}
+.btn.ghost{background:transparent; color:var(--ink); border:2px solid var(--ink);}
+.btn.warm{background:var(--warm);}
+.btn.cool{background:var(--cool);}
+.row-center{display:flex; justify-content:center; gap:.7rem; flex-wrap:wrap; margin-top:.8rem;}
+
+.char-row{display:flex; justify-content:center; gap:1rem; margin:.6rem 0;}
+.char-row svg{width:110px; height:110px;}
+
+/* نمودار چرخه‌ای کلیک‌پذیر — الگوی مشترک همه‌ی بازی‌ها */
+.cycle-wrap{position:relative; max-width:300px; margin:1rem auto 0; aspect-ratio:1/1;}
+.cycle-wrap svg.arrows{position:absolute; inset:0; width:100%; height:100%;}
+.cycle-node{position:absolute; transform:translate(-50%,-50%); width:44%; text-align:center; cursor:pointer; z-index:2;}
+.cycle-node .pt{width:13px; height:13px; border-radius:50%; background:var(--warm); margin:0 auto .35rem; transition:transform .2s;}
+.cycle-node.seen .pt{background:var(--cool);}
+.cycle-node p{font-size:.76rem; font-weight:700; margin:0;}
+.cycle-node:hover .pt{transform:scale(1.3);}
+.cycle-detail{min-height:2.6rem; text-align:center; font-size:.86rem; color:var(--ink-soft); background:var(--paper); border-radius:10px; padding:.5rem .8rem; margin-top:.6rem;}
+
+/* اسلایدر «چه می‌شد اگر» — الگوی مشترک */
+input[type=range]{width:100%; margin:.6rem 0; accent-color:var(--warm);}
+.slider-value{text-align:center; font-weight:700; color:var(--warm);}
+.friction-bar-wrap{margin-top:1rem;}
+.friction-bar{height:14px; border-radius:8px; background:var(--paper); overflow:hidden;}
+.friction-fill{height:100%; width:50%; transition:width .5s;}
+.friction-label{text-align:center; font-size:.85rem; color:var(--ink-soft); margin-top:.3rem;}
+
+/* کاربرد در زندگی واقعی — الگوی مشترک */
+.try-real{background:var(--paper); border-radius:14px; padding:1rem; margin-top:.6rem;}
+.try-real p{font-size:.88rem; margin-bottom:.5rem; text-align:center;}
+.try-real input{width:100%; padding:.6rem .8rem; border-radius:10px; border:2px solid var(--pencil); background:#fff; font-family:inherit; font-size:.92rem; margin-bottom:.6rem;}
+.real-suggestion{margin-top:.7rem; font-size:.87rem; color:var(--cool); font-weight:600; text-align:center; display:none;}
+.real-suggestion.show{display:block;}
+
+/* جمع‌بندی پایانی — الگوی مشترک */
+.result-tag{background:var(--paper); border-radius:12px; padding:.8rem 1rem; font-size:.9rem; font-weight:600; text-align:center; margin-top:.6rem;}
+.summary-list{list-style:none; padding:0; margin:1rem 0 0;}
+.summary-list li{background:var(--paper); border-radius:10px; padding:.6rem .9rem; margin-bottom:.5rem; font-size:.86rem; font-weight:600; display:flex; align-items:center; gap:.5rem;}
+.summary-list li .chk{color:var(--cool); font-weight:900;}
+
+.nav-buttons{display:flex; justify-content:space-between; margin-top:1rem; gap:.6rem;}
+.nav-buttons .btn{flex:1;}
+.next-hint{font-size:.8rem; color:var(--pencil); text-align:center; margin-top:1rem;}
+
+@media (max-width:420px){ .reveal-bars{gap:1.2rem;} }
+
+/* عدد قابل‌کشیدن (Tangle-lite) — مشترک بین همه‌ی بازی‌ها */
+.tangle-num{
+  display:inline-block; font-weight:800; color:var(--warm);
+  border-bottom:2px dashed var(--warm); cursor:ew-resize; padding:0 .1rem;
+  user-select:none; touch-action:none;
+}
+.tangle-num.dragging{ color:var(--gold); border-color:var(--gold); }
+.tangle-output{ font-weight:800; color:var(--cool); }
+.tangle-para{
+  background:var(--paper); border-radius:14px; padding:1rem 1.1rem;
+  font-size:1rem; line-height:2.1; text-align:center;
+}
+
+
+/* ---- استایل مخصوص همین بازی (game-style.css) ---- */
+/* استایل مخصوص «دفترچه‌ی فراموش‌شده» — کلاس‌های عمومی در shared-src/paper-theme.css هستند */
+
+.meter-fill{ background:var(--warm-2); opacity:.6; }
+
+.scene-emoji{ font-size:3.4rem; text-align:center; margin:.4rem 0; }
+
+.wizard-guess{ display:flex; gap:.6rem; justify-content:center; align-items:center; flex-wrap:wrap; }
+.wizard-guess input{
+  width:6rem; text-align:center; font-family:inherit; font-size:1.15rem; font-weight:800;
+  padding:.5rem; border-radius:10px; border:1.5px solid var(--pencil); color:var(--gold);
+}
+.wizard-guess span{ font-size:.9rem; color:var(--ink-soft); font-weight:600; }
+
+/* حلقه‌ی رشد (Loopy-style) */
+.loop-visual{ position:relative; max-width:240px; margin:.6rem auto; aspect-ratio:1/1; }
+.loop-visual svg{ width:100%; height:100%; }
+.loop-year{
+  position:absolute; bottom:6%; left:50%; transform:translateX(-50%);
+  font-size:.85rem; font-weight:800; color:var(--ink-soft);
+  background:var(--paper); padding:.15rem .8rem; border-radius:20px;
+}
+
+/* نمودار داخل صحنه‌ی کاوش */
+.chart-shell{
+  background:linear-gradient(160deg, #2a2013, #1c150c); border-radius:18px;
+  padding:.8rem .5rem .4rem; margin-top:.8rem;
+}
+.chart-shell canvas{ width:100%!important; height:260px!important; }
+
+</style>
+</head>
+<body>
+<div class="app" data-title="دفترچه‌ی فراموش‌شده · یه رازِ کوچیک تو کشوی مادربزرگ">
+  <a class="back" href="../../dashboard.html">← بازگشت به داشبورد</a>
+
+  <div class="meter-wrap">
+    <div class="meter-labels"><span>🐢 آهسته</span><span>🐇 سریع دوبرابر می‌شه</span></div>
+    <div class="meter-bar"><div class="meter-fill" id="meterFill"></div></div>
+    <div class="meter-tag"><span id="meterTag">دوبرابر شدن در ۱۰ سال</span></div>
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <div class="stage" id="stage">
+
+    <!-- 0: hook — ambiguous discovery -->
+    <section class="scene active" data-scene="drawer">
+      <h2 class="scene-title">یه کشوی قدیمی</h2>
+      <div class="scene-emoji">🗄️</div>
+      <p class="scene-sub">داری خونه‌ی مادربزرگ رو مرتب می‌کنی. ته یه کشو، زیر یه عالمه کاغذ و عکس‌های کهنه، یه چیزی برق می‌زنه.</p>
+      <p class="caption">چیزی که پیدا می‌کنی، قرار نیست فقط یه خاطره باشه.</p>
+      <div class="row-center"><button class="btn warm" id="drawerNext">نگاه دقیق‌تر بنداز</button></div>
+    </section>
+
+    <!-- 1: reveal begins -->
+    <section class="scene" data-scene="bankbook">
+      <h2 class="scene-title">یه دفترچه‌ی بانکی</h2>
+      <div class="scene-emoji">📔</div>
+      <p class="scene-sub">رنگ‌ورو رفته، گوشه‌هاش پاره. یه تاریخ روش نوشته شده که یادت نمیاد اصلاً کِی بوده.</p>
+      <p class="caption">مادربزرگ یه‌بار درباره‌ش یه چیزی گفته بود... ولی الان دقیق یادت نیست چی.</p>
+      <div class="row-center"><button class="btn warm" id="bankbookNext">بازش کن</button></div>
+    </section>
+
+    <!-- 2: guess -->
+    <section class="scene" data-scene="guess">
+      <h2 class="scene-title">یه عدد کوچیک، اول دفترچه</h2>
+      <div class="scene-emoji">🔍</div>
+      <p class="scene-sub">یه مبلغ کوچیک، با یه نرخ سود که اون‌موقع باهاش باز شده. اگه همون مسیر رو تا امروز ادامه داده باشه...</p>
+      <p class="caption">قبل از اینکه با هم حساب کنیم — چند سال به‌نظرت طول کشیده تا این پول دقیقاً دوبرابر بشه؟</p>
+      <div class="wizard-guess" style="margin-top:.6rem;">
+        <input type="number" id="guessInput" min="1" max="60" placeholder="؟">
+        <span>سال</span>
+      </div>
+    </section>
+
+    <!-- 3: loopy-style growth loop -->
+    <section class="scene" data-scene="loop">
+      <h2 class="scene-title">یه چرخه‌ی ساده، ولی سمج</h2>
+      <p class="scene-sub">سود هرسال، خودش می‌ره تو اصل پول — و سالِ بعد، سود روی سودِ قبلی هم حساب می‌شه.</p>
+      <div class="loop-visual">
+        <svg id="loopSvg" viewBox="0 0 220 220"></svg>
+        <div class="loop-year" id="loopYear">سال ۰</div>
+      </div>
+      <div class="row-center">
+        <button class="btn cool" id="loopPlayBtn">▶️ بذار جلو بره</button>
+      </div>
+      <p class="caption">دایره‌ی بزرگ‌تر یعنی اصل پول بزرگ‌تر شده — و چون بزرگ‌تره، سودِ بعدیش هم بزرگ‌تره. برای همینه که رشد مرکب، آهسته شروع می‌شه ولی شتاب می‌گیره.</p>
+    </section>
+
+    <!-- 4: tangle exploration + chart + comparison -->
+    <section class="scene" data-scene="explore">
+      <h2 class="scene-title">حالا خودت بازی کن</h2>
+      <p class="tangle-para">
+        اگه نرخ سود <span class="tangle-num" data-var="rate" data-val="20" data-min="1" data-max="80" data-step="1" data-unit="٪">۲۰٪</span>
+        باشه، بعد از <span class="tangle-num" data-var="years" data-val="10" data-min="1" data-max="40" data-step="1" data-unit=" سال">۱۰ سال</span>،
+        دفترچه‌ی ۱۰ سکه‌ای مادربزرگ می‌شه <span class="tangle-output" id="outCompound">—</span> سکه.
+        <br>اگه سودش «ساده» بود (نه مرکب)، فقط می‌شد <span class="tangle-output" id="outSimple">—</span> سکه.
+      </p>
+      <p class="caption">اعداد آبی‌رنگ رو بکش (چپ/راست) تا خودت امتحان کنی.</p>
+      <div class="chart-shell"><canvas id="chart"></canvas></div>
+      <p class="caption" id="milestoneCaption"></p>
+    </section>
+
+    <!-- 5: apply to real life -->
+    <section class="scene" data-scene="apply">
+      <h2 class="scene-title">اگه امروز شروع کنی چی؟</h2>
+      <div class="try-real">
+        <p>یه مبلغ که این روزها می‌تونی ماهانه کنار بذاری رو بنویس (فقط برای تصورش):</p>
+        <input type="text" id="realAmount" placeholder="مثلاً: ۵۰۰ هزار تومان">
+        <div class="row-center"><button class="btn cool" id="realBtn">یادآوری بساز</button></div>
+        <div class="real-suggestion" id="realSuggestion"></div>
+      </div>
+    </section>
+
+    <!-- 6: summary -->
+    <section class="scene" data-scene="summary">
+      <h2 class="scene-title">جمع‌بندی دفترچه</h2>
+      <div class="stage-visual" style="max-width:170px;"><svg id="svgSummary" viewBox="0 0 200 200"></svg></div>
+      <div class="result-tag" id="resultTag"></div>
+      <ul class="summary-list">
+        <li><span class="chk">✓</span> هرچی زودتر شروع کنی، زمان بیشتری برای «شتاب‌گرفتن» داری</li>
+        <li><span class="chk">✓</span> نرخ سود مهمه، ولی صبر معمولاً مهم‌تره</li>
+        <li><span class="chk">✓</span> بهره مرکب آهسته شروع می‌شه — تسلیم نشو</li>
+      </ul>
+      <div class="row-center" style="margin-top:1rem;"><button class="btn ghost" id="replayBtn">دوباره از اول</button></div>
+      <p class="next-hint">این دفترچه، شروع ماجرا بود. یه در بسته‌ی دیگه هم تو همین محل هست...</p>
+    </section>
+
+  </div>
+
+  <div class="nav-buttons">
+    <button class="btn ghost" id="prevBtn">قبلی</button>
+    <button class="btn" id="nextBtn">بعدی</button>
+  </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/rough.js/2.1.1/rough.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+/*
+  draw-helpers.js — جعبه‌ابزار رسم مشترک برای بازی‌های روایت‌محور «شهر ابزار مالی»
+  ---------------------------------------------------------------------------
+  تمام تصویرسازی با rough.js انجام می‌شود؛ هیچ فایل عکسی لازم نیست.
+  این فایل را هیچ بازی‌ای نباید کپی/بازنویسی کند — فقط از window.FCDraw استفاده کند.
+  پیش‌نیاز: <script src=".../rough.umd.min.js"> باید قبل از این فایل لود شده باشد.
+*/
+(function (global) {
+  'use strict';
+
+  if (typeof rough === 'undefined') {
+    console.error('rough.js لود نشده — draw-helpers.js نمی‌تواند کار کند.');
+    return;
+  }
+
+  var faDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+  function toFa(n){ return String(n).replace(/[0-9]/g, function(d){ return faDigits[d]; }); }
+
+  function rc(svg){ return rough.svg(svg); }
+
+  /* ---------- صورتک (شخصیت‌ها) ---------- */
+  // mood: 'happy' | 'neutral' | 'sad' | 'sly'
+  function drawFace(svg, cx, cy, scale, color, mood, ink){
+    scale = scale || 1; ink = ink || '#23273A';
+    var g = rc(svg);
+    svg.appendChild(g.circle(cx, cy, 70*scale, {fill:color, fillStyle:'hachure', hachureGap:4, stroke:ink, strokeWidth:2, roughness:1.9}));
+    var eyeSize = mood==='sly' ? 3 : 5;
+    var eyeL=[cx-20*scale, cy-8*scale], eyeR=[cx+20*scale, cy-8*scale];
+    if (mood==='sly'){
+      svg.appendChild(g.line(eyeL[0]-6*scale,eyeL[1],eyeL[0]+6*scale,eyeL[1],{stroke:ink,strokeWidth:2.4,roughness:1.6}));
+      svg.appendChild(g.line(eyeR[0]-6*scale,eyeR[1],eyeR[0]+6*scale,eyeR[1],{stroke:ink,strokeWidth:2.4,roughness:1.6}));
+    } else {
+      svg.appendChild(g.circle(eyeL[0],eyeL[1],eyeSize*scale,{fill:ink,fillStyle:'solid',stroke:'none'}));
+      svg.appendChild(g.circle(eyeR[0],eyeR[1],eyeSize*scale,{fill:ink,fillStyle:'solid',stroke:'none'}));
+    }
+    var mouth=[cx, cy+22*scale], mpath;
+    if (mood==='happy'){
+      mpath = 'M '+(mouth[0]-16*scale)+' '+mouth[1]+' Q '+mouth[0]+' '+(mouth[1]+14*scale)+' '+(mouth[0]+16*scale)+' '+mouth[1];
+    } else if (mood==='sad'){
+      mpath = 'M '+(mouth[0]-16*scale)+' '+(mouth[1]+8*scale)+' Q '+mouth[0]+' '+(mouth[1]-8*scale)+' '+(mouth[0]+16*scale)+' '+(mouth[1]+8*scale);
+    } else if (mood==='sly'){
+      mpath = 'M '+(mouth[0]-14*scale)+' '+mouth[1]+' Q '+(mouth[0]+4*scale)+' '+(mouth[1]+10*scale)+' '+(mouth[0]+18*scale)+' '+(mouth[1]-6*scale);
+    } else {
+      mpath = 'M '+(mouth[0]-14*scale)+' '+mouth[1]+' L '+(mouth[0]+14*scale)+' '+mouth[1];
+    }
+    svg.appendChild(g.path(mpath,{stroke:ink,strokeWidth:2.2,roughness:1.6,fill:'none'}));
+  }
+
+  /* ---------- سکه ---------- */
+  function drawCoin(svg, cx, cy, r, color, ink){
+    ink = ink || '#23273A';
+    var g = rc(svg);
+    svg.appendChild(g.circle(cx, cy, r*2, {fill:color, fillStyle:'hachure', hachureGap:2.5, stroke:ink, strokeWidth:1.8, roughness:1.7}));
+    svg.appendChild(g.circle(cx, cy, r*1.1, {stroke:ink, strokeWidth:1.2, roughness:1.5, fill:'none'}));
+  }
+
+  /* ---------- دست‌دادن ---------- */
+  function drawHandshake(svg, cx, cy, scale, color){
+    scale = scale || 1;
+    var g = rc(svg);
+    svg.appendChild(g.line(cx-30*scale, cy, cx-4*scale, cy-6*scale, {stroke:color, strokeWidth:5*scale, roughness:1.7}));
+    svg.appendChild(g.line(cx+30*scale, cy, cx+4*scale, cy-6*scale, {stroke:color, strokeWidth:5*scale, roughness:1.7}));
+    svg.appendChild(g.ellipse(cx, cy-6*scale, 14*scale, 9*scale, {fill:color, fillStyle:'solid', stroke:'#23273A', strokeWidth:1.4, roughness:1.5}));
+  }
+
+  /* ---------- آینه (برای شخصیتِ «تکرارگر») ---------- */
+  function drawMirror(svg, cx, cy, scale, color){
+    scale = scale || 1;
+    var g = rc(svg);
+    svg.appendChild(g.rectangle(cx-18*scale, cy-24*scale, 36*scale, 48*scale, {fill:color, fillStyle:'hachure', hachureGap:3, stroke:'#23273A', strokeWidth:1.8, roughness:1.8}));
+    svg.appendChild(g.line(cx, cy-24*scale, cx, cy+24*scale, {stroke:'#23273A', strokeWidth:1.2, roughness:1.4}));
+  }
+
+  /* ---------- ذره‌بین / چشم‌بند (برای سوگیری‌های شناختی) ---------- */
+  function drawMagnifier(svg, cx, cy, scale, color){
+    scale = scale || 1;
+    var g = rc(svg);
+    svg.appendChild(g.circle(cx-10*scale, cy-10*scale, 46*scale, {stroke:color, strokeWidth:3.5, roughness:1.6, fill:'none'}));
+    svg.appendChild(g.line(cx+16*scale, cy+16*scale, cx+40*scale, cy+40*scale, {stroke:color, strokeWidth:5*scale, roughness:1.6}));
+  }
+  function drawEyePatch(svg, cx, cy, scale, color){
+    scale = scale || 1;
+    var g = rc(svg);
+    svg.appendChild(g.ellipse(cx, cy, 40*scale, 26*scale, {fill:color, fillStyle:'cross-hatch', hachureGap:3, stroke:'#23273A', strokeWidth:1.8, roughness:1.7}));
+  }
+
+  /* ---------- فلش خمیده (برای نمودار چرخه‌ای) ---------- */
+  function arrowHead(g, svg, x,y,angle,size,color){
+    size = size || 8;
+    var a1=angle+Math.PI*0.78, a2=angle-Math.PI*0.78;
+    svg.appendChild(g.line(x,y,x+size*Math.cos(a1),y+size*Math.sin(a1),{stroke:color,strokeWidth:2,roughness:1.6}));
+    svg.appendChild(g.line(x,y,x+size*Math.cos(a2),y+size*Math.sin(a2),{stroke:color,strokeWidth:2,roughness:1.6}));
+  }
+  function curvedArrow(svg, x1,y1, x2,y2, color, opts){
+    opts = opts || {};
+    var g = rc(svg);
+    var mx=(x1+x2)/2+(opts.bend||0), my=(y1+y2)/2+(opts.bendY||0);
+    svg.appendChild(g.path('M '+x1+' '+y1+' Q '+mx+' '+my+' '+x2+' '+y2, {stroke:color, strokeWidth:2.2, roughness:1.4, bowing:1}));
+    arrowHead(g, svg, x2, y2, Math.atan2(y2-my, x2-mx), 9, color);
+  }
+
+  /* ---------- کمکی: نمودار چرخه‌ای کلیک‌پذیر با گره‌های دایره‌ای ---------- */
+  // positions: آرایه‌ی {top, left} به‌صورت درصد؛ اگر ندهید، خودکار روی یک دایره می‌چیند
+  function layoutCycleNodes(nodeEls, positions){
+    var defaultPos = [
+      {top:'4%',left:'50%'},{top:'22%',left:'88%'},{top:'62%',left:'94%'},
+      {top:'92%',left:'62%'},{top:'80%',left:'18%'},{top:'34%',left:'8%'}
+    ];
+    var pos = positions || defaultPos;
+    nodeEls.forEach(function(el, i){
+      var p = pos[i % pos.length];
+      el.style.top = p.top; el.style.left = p.left;
+    });
+  }
+  function drawCycleArrows(svg, count, color){
+    svg.innerHTML = '';
+    var pts = [{x:50,y:8},{x:86,y:26},{x:92,y:66},{x:60,y:92},{x:22,y:80},{x:10,y:36}];
+    for (var i=0;i<count;i++){
+      var a=pts[i % pts.length], b=pts[(i+1) % count];
+      curvedArrow(svg, a.x, a.y, b.x, b.y, color, {});
+    }
+  }
+
+  global.FCDraw = {
+    toFa: toFa,
+    rc: rc,
+    drawFace: drawFace,
+    drawCoin: drawCoin,
+    drawHandshake: drawHandshake,
+    drawMirror: drawMirror,
+    drawMagnifier: drawMagnifier,
+    drawEyePatch: drawEyePatch,
+    curvedArrow: curvedArrow,
+    layoutCycleNodes: layoutCycleNodes,
+    drawCycleArrows: drawCycleArrows
+  };
+})(window);
+
+</script>
+<script>
+/*
+  scene-engine.js — موتور عمومی ناوبری صحنه برای بازی‌های روایت‌محور
+  ------------------------------------------------------------------
+  این فایل هیچ چیز مخصوص یک بازی خاص (متر، شخصیت، امتیاز) را نمی‌داند —
+  فقط مسئول ناوبری بین صحنه‌ها، نقطه‌های پیشرفت، و صدا زدن callback هر بازی است.
+  منطق مخصوص هر بازی (رسم، محاسبه‌ی متر، ...) در game-logic.js خودِ همان بازی می‌ماند.
+
+  نحوه‌ی استفاده:
+    var engine = FCScene.init({
+      sceneSelector: '.scene',
+      dotsSelector: '#dots',
+      prevBtnId: 'prevBtn',
+      nextBtnId: 'nextBtn',
+      onEnter: function(index, sceneName){ ... },   // هر بار وارد صحنه‌ی جدید می‌شویم
+      onFinish: function(){ location.reload(); }     // وقتی از آخرین صحنه «بعدی» زده شود
+    });
+    engine.goto(3);          // پرش دستی به صحنه‌ی شماره‌ی ۴ (اندیس از صفر)
+    engine.current();        // اندیس صحنه‌ی فعلی
+*/
+(function (global) {
+  'use strict';
+
+  function init(config){
+    var scenes = Array.from(document.querySelectorAll(config.sceneSelector));
+    var dotsEl = document.querySelector(config.dotsSelector);
+    var prevBtn = document.getElementById(config.prevBtnId);
+    var nextBtn = document.getElementById(config.nextBtnId);
+    var current = 0;
+
+    scenes.forEach(function(){
+      var d = document.createElement('div');
+      d.className = 'dot';
+      dotsEl.appendChild(d);
+    });
+    var dots = Array.from(dotsEl.children);
+
+    function updateDots(){
+      dots.forEach(function(d, i){
+        d.classList.toggle('active', i === current);
+        d.classList.toggle('done', i < current);
+      });
+    }
+
+    function sceneName(i){
+      return scenes[i].dataset.scene || '';
+    }
+
+    function goto(i){
+      if (i < 0 || i >= scenes.length) return;
+      scenes[current].classList.remove('active');
+      current = i;
+      scenes[current].classList.add('active');
+      if (prevBtn) prevBtn.disabled = (current === 0);
+      if (nextBtn) nextBtn.textContent = (current === scenes.length - 1)
+        ? (config.finishLabel || 'دوباره از اول')
+        : (config.nextLabel || 'بعدی');
+      updateDots();
+      if (typeof config.onEnter === 'function') config.onEnter(current, sceneName(current));
+    }
+
+    if (prevBtn){
+      prevBtn.addEventListener('click', function(){ goto(current - 1); });
+    }
+    if (nextBtn){
+      nextBtn.addEventListener('click', function(){
+        if (current === scenes.length - 1){
+          if (typeof config.onFinish === 'function') config.onFinish();
+          else location.reload();
+          return;
+        }
+        goto(current + 1);
+      });
+    }
+
+    // مقداردهی اولیه
+    if (prevBtn) prevBtn.disabled = true;
+    updateDots();
+    if (typeof config.onEnter === 'function') config.onEnter(current, sceneName(current));
+
+    return {
+      goto: goto,
+      current: function(){ return current; },
+      sceneCount: function(){ return scenes.length; },
+      advance: function(){
+        if (nextBtn) nextBtn.click();
+      }
+    };
+  }
+
+  global.FCScene = { init: init };
+})(window);
+
+</script>
+<script>
+/*
+  tangle-lite.js — نسخه‌ی سبک الهام‌گرفته از Tangle.js برت ویکتور
+  ------------------------------------------------------------------
+  به‌جای اسلایدر جدا، عدد داخل خودِ جمله «قابل‌کشیدن» می‌شود — دقیقاً فلسفه‌ی
+  «سند واکنش‌گرا»ی برت ویکتور. کاربر روی عدد می‌کشد (چپ/راست یا بالا/پایین)
+  و همان لحظه مقدار عوض می‌شود.
+
+  نشانه‌گذاری در scenes.html:
+    <span class="tangle-num" data-var="years" data-val="10" data-min="1" data-max="40" data-step="1" data-unit=" سال">۱۰ سال</span>
+
+  نحوه‌ی استفاده در game-logic.js:
+    FCTangle.init('#sceneId', function(varName, value){
+      // اینجا محاسبه‌ی دوباره + به‌روزرسانی خروجی‌ها/نمودار
+    });
+
+  خروجی‌های وابسته (که فقط باید متن‌شون به‌روز بشه، قابل‌کشیدن نیستن):
+    <span class="tangle-output" id="outCoins">—</span>
+*/
+(function (global) {
+  'use strict';
+
+  function setDisplay(el){
+    var val = parseFloat(el.dataset.val);
+    var unit = el.dataset.unit || '';
+    var text = (global.FCDraw ? global.FCDraw.toFa(val) : val) + unit;
+    el.textContent = text;
+  }
+
+  function init(rootSelector, onChange){
+    var root = typeof rootSelector === 'string' ? document.querySelector(rootSelector) : rootSelector;
+    if (!root) return;
+    var nums = Array.from(root.querySelectorAll('.tangle-num'));
+
+    nums.forEach(function(el){
+      setDisplay(el);
+      var min = parseFloat(el.dataset.min), max = parseFloat(el.dataset.max), step = parseFloat(el.dataset.step || '1');
+      var dragging = false, startX = 0, startVal = 0;
+
+      function clientX(e){ return e.touches ? e.touches[0].clientX : e.clientX; }
+
+      function down(e){
+        dragging = true;
+        startX = clientX(e);
+        startVal = parseFloat(el.dataset.val);
+        el.classList.add('dragging');
+        e.preventDefault();
+      }
+      function move(e){
+        if (!dragging) return;
+        var dx = clientX(e) - startX;
+        var delta = Math.round(dx / 8) * step; // هر ۸ پیکسل یک گام
+        var val = Math.max(min, Math.min(max, startVal + delta));
+        if (val !== parseFloat(el.dataset.val)){
+          el.dataset.val = val;
+          setDisplay(el);
+          if (typeof onChange === 'function') onChange(el.dataset.var, val);
+        }
+        e.preventDefault();
+      }
+      function up(){
+        dragging = false;
+        el.classList.remove('dragging');
+      }
+
+      el.addEventListener('mousedown', down);
+      el.addEventListener('touchstart', down, {passive:false});
+      window.addEventListener('mousemove', move);
+      window.addEventListener('touchmove', move, {passive:false});
+      window.addEventListener('mouseup', up);
+      window.addEventListener('touchend', up);
+    });
+
+    // مقدار اولیه‌ی همه‌ی خروجی‌های وابسته را هم یک‌بار محاسبه کن
+    if (typeof onChange === 'function' && nums.length){
+      onChange(nums[0].dataset.var, parseFloat(nums[0].dataset.val));
+    }
+  }
+
+  function getValues(rootSelector){
+    var root = typeof rootSelector === 'string' ? document.querySelector(rootSelector) : rootSelector;
+    var out = {};
+    Array.from(root.querySelectorAll('.tangle-num')).forEach(function(el){
+      out[el.dataset.var] = parseFloat(el.dataset.val);
+    });
+    return out;
+  }
+
+  global.FCTangle = { init: init, getValues: getValues };
+})(window);
+
+</script>
+<script>
+
+/* ---- 01-loopy.js ---- */
+/* 01-loopy.js — حلقه‌ی رشد به سبک Loopy (نیکی کیس): یک stock که هر tick بزرگ‌تر می‌شود */
+var LoopDemo = (function(){
+  var PRINCIPAL = 10, RATE = 0.25, TOTAL_YEARS = 8;
+  var svg, yearLabel, timer, year, playing;
+
+  function drawFrame(value){
+    svg.innerHTML = '';
+    var g = FCDraw.rc(svg);
+    var cx = 110, cy = 110;
+    var r = 22 + Math.sqrt(value) * 9; // شعاع متناسب با ریشه‌ی مقدار، تا مساحت معنادار بمونه
+    svg.appendChild(g.circle(cx, cy, r * 2, {
+      fill: '#DCB24A', fillStyle: 'hachure', hachureGap: 3.2,
+      stroke: '#8A6A1F', strokeWidth: 2, roughness: 1.8
+    }));
+    // فلش بازخورد کوچک، دورِ خودِ دایره
+    FCDraw.curvedArrow(svg, cx + r * 0.65, cy - r * 0.55, cx - r * 0.2, cy - r * 0.75, '#8A6A1F', {bend: -14});
+  }
+
+  function tick(){
+    year++;
+    var value = PRINCIPAL * Math.pow(1 + RATE, year);
+    drawFrame(value);
+    yearLabel.textContent = 'سال ' + FCDraw.toFa(year) + ' — ' + FCDraw.toFa(Math.round(value)) + ' سکه';
+    if (year >= TOTAL_YEARS){
+      clearInterval(timer);
+      playing = false;
+    }
+  }
+
+  function play(){
+    if (playing) return;
+    playing = true;
+    year = 0;
+    drawFrame(PRINCIPAL);
+    yearLabel.textContent = 'سال ۰ — ' + FCDraw.toFa(PRINCIPAL) + ' سکه';
+    clearInterval(timer);
+    timer = setInterval(tick, 650);
+  }
+
+  function init(svgId, yearLabelId){
+    svg = document.getElementById(svgId);
+    yearLabel = document.getElementById(yearLabelId);
+    year = 0; playing = false;
+    drawFrame(PRINCIPAL);
+    yearLabel.textContent = 'سال ۰ — ' + FCDraw.toFa(PRINCIPAL) + ' سکه';
+  }
+
+  return { init: init, play: play };
+})();
+
+
+/* ---- 02-chart.js ---- */
+/* 02-chart.js — نمودار مرکب در برابر ساده، برای صحنه‌ی «کاوش با اعداد» */
+var ChartDemo = (function(){
+  var PRINCIPAL = 10;
+  var chart = null;
+
+  function compoundValue(t, rate){ return PRINCIPAL * Math.pow(1 + rate, t); }
+  function simpleValue(t, rate){ return PRINCIPAL * (1 + rate * t); }
+
+  function build(ratePercent, years){
+    var rate = ratePercent / 100;
+    var steps = 60, compoundData = [], simpleData = [];
+    for (var i = 0; i <= steps; i++){
+      var t = (years * i) / steps;
+      compoundData.push({ x: t, y: compoundValue(t, rate) });
+      simpleData.push({ x: t, y: simpleValue(t, rate) });
+    }
+    var finalCompound = compoundData[compoundData.length - 1].y;
+    var finalSimple = simpleData[simpleData.length - 1].y;
+
+    var cfg = {
+      type: 'line',
+      data: {
+        datasets: [
+          { label:'مرکب', data:compoundData, borderColor:'#dcb24a', backgroundColor:'rgba(220,178,74,0.12)', borderWidth:3, fill:true, pointRadius:0, tension:0.25 },
+          { label:'ساده', data:simpleData, borderColor:'#4f8f83', backgroundColor:'transparent', borderWidth:2, borderDash:[6,4], pointRadius:0, tension:0 }
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        interaction:{ mode:'index', intersect:false },
+        plugins:{
+          legend:{ labels:{ color:'#e8dcb8', font:{family:"'Vazirmatn', sans-serif", size:12, weight:'600'}, usePointStyle:true, pointStyle:'circle' } },
+          tooltip:{
+            rtl:true, titleFont:{family:"'Vazirmatn', sans-serif"}, bodyFont:{family:"'Vazirmatn', sans-serif"},
+            callbacks:{
+              title: function(items){ return 'سال ' + FCDraw.toFa(Math.round(items[0].parsed.x)); },
+              label: function(item){ return item.dataset.label + '：' + FCDraw.toFa(Math.round(item.parsed.y)) + ' سکه'; }
+            }
+          }
+        },
+        scales:{
+          x:{ type:'linear', title:{display:true,text:'سال',color:'#b9c2d6',font:{family:"'Vazirmatn', sans-serif",weight:'600'}},
+              ticks:{color:'#b9c2d6',font:{family:"'Vazirmatn', sans-serif"},callback:function(v){return FCDraw.toFa(Math.round(v));}},
+              grid:{color:'rgba(255,255,255,0.06)'} },
+          y:{ title:{display:true,text:'سکه',color:'#b9c2d6',font:{family:"'Vazirmatn', sans-serif",weight:'600'}},
+              ticks:{color:'#b9c2d6',font:{family:"'Vazirmatn', sans-serif"},callback:function(v){return FCDraw.toFa(Math.round(v));}},
+              grid:{color:'rgba(255,255,255,0.06)'} }
+        }
+      }
+    };
+
+    if (chart){ chart.data = cfg.data; chart.options = cfg.options; chart.update(); }
+    else { chart = new Chart(document.getElementById('chart').getContext('2d'), cfg); }
+
+    return { finalCompound: finalCompound, finalSimple: finalSimple };
+  }
+
+  return { build: build };
+})();
+
+
+/* ---- 03-game.js ---- */
+/* 03-game.js — حالت اصلی بازی، اتصال Tangle/Loopy/Chart به موتور صحنه */
+(function(){
+  var toFa = FCDraw.toFa;
+  var userGuess = null;
+  var currentDoubleYears = null;
+  var lastResult = null;
+
+  function updateMeter(rate, doubleYears){
+    var pct = Math.max(5, Math.min(95, 100 - doubleYears * 2));
+    document.getElementById('meterFill').style.width = pct + '%';
+    var label = doubleYears < 1
+      ? 'دوبرابر شدن در ' + toFa(Math.round(doubleYears * 12)) + ' ماه'
+      : 'دوبرابر شدن در ' + toFa(Math.round(doubleYears * 10) / 10) + ' سال';
+    document.getElementById('meterTag').textContent = label;
+  }
+
+  function recompute(varName, value){
+    var vals = FCTangle.getValues('#stage');
+    var rate = vals.rate, years = vals.years;
+    var result = ChartDemo.build(rate, years);
+    lastResult = result;
+
+    document.getElementById('outCompound').textContent = toFa(Math.round(result.finalCompound));
+    document.getElementById('outSimple').textContent = toFa(Math.round(result.finalSimple));
+
+    var ratePerYear = rate / 100;
+    currentDoubleYears = Math.log(2) / Math.log(1 + ratePerYear);
+    updateMeter(rate, currentDoubleYears);
+
+    var diff = Math.round(result.finalCompound - result.finalSimple);
+    document.getElementById('milestoneCaption').textContent =
+      'با این عدد‌ها، مرکب ' + toFa(diff) + ' سکه بیشتر از ساده به‌دست میاره — فقط به‌خاطر سودِ روی سود.';
+  }
+
+  function onEnterScene(i, name){
+    if (name === 'loop') LoopDemo.init('loopSvg', 'loopYear');
+    if (name === 'explore') FCTangle.init('#stage', recompute);
+    if (name === 'summary'){ drawSummary(); showResult(); }
+  }
+
+  function drawSummary(){
+    var svg = document.getElementById('svgSummary'); svg.innerHTML = '';
+    FCDraw.drawFace(svg, 100, 100, 0.8, '#DDD3C4', 'happy');
+  }
+
+  function showResult(){
+    var box = document.getElementById('resultTag');
+    if (userGuess !== null && currentDoubleYears !== null){
+      var diff = Math.abs(userGuess - currentDoubleYears);
+      var guessMsg = 'حدس تو ' + toFa(userGuess) + ' سال بود — ';
+      guessMsg += diff < 1 ? 'خیلی نزدیک زدی! 🎯' : (userGuess < currentDoubleYears ? 'واقعیت بیشتر از این طول کشید.' : 'واقعیت زودتر از این اتفاق افتاد.');
+      box.textContent = guessMsg;
+    } else if (lastResult){
+      box.textContent = 'با تنظیماتی که انتخاب کردی، دفترچه به ' + toFa(Math.round(lastResult.finalCompound)) + ' سکه رسید.';
+    } else {
+      box.textContent = 'رشد مرکب، همیشه از یه عدد کوچیک شروع می‌شه.';
+    }
+  }
+
+  var engine = FCScene.init({
+    sceneSelector: '.scene', dotsSelector: '#dots', prevBtnId: 'prevBtn', nextBtnId: 'nextBtn',
+    finishLabel: 'دوباره از اول',
+    onFinish: function(){ location.reload(); },
+    onEnter: onEnterScene
+  });
+
+  document.getElementById('drawerNext').addEventListener('click', function(){ engine.goto(engine.current()+1); });
+  document.getElementById('bankbookNext').addEventListener('click', function(){ engine.goto(engine.current()+1); });
+  document.getElementById('replayBtn').addEventListener('click', function(){ location.reload(); });
+
+  document.getElementById('guessInput').addEventListener('input', function(e){
+    var v = parseFloat(e.target.value);
+    userGuess = isNaN(v) ? null : v;
+  });
+
+  document.getElementById('loopPlayBtn').addEventListener('click', function(){ LoopDemo.play(); });
+
+  document.getElementById('realBtn').addEventListener('click', function(){
+    var v = document.getElementById('realAmount').value.trim();
+    var box = document.getElementById('realSuggestion');
+    if (!v){ box.textContent = 'اول یه مبلغ بنویس :)'; box.classList.add('show'); return; }
+    box.textContent = 'اگه از امروز «' + v + '» رو هرماه کنار بذاری، سالِ اول تقریباً حسش نمی‌کنی — ولی همون سالِ اول، پایه‌ی همون چرخه‌ای می‌شه که تو صحنه‌ی قبل دیدی.';
+    box.classList.add('show');
+  });
+})();
+
+</script>
+</body>
+</html>

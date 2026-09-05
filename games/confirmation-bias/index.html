@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سوگیری تاییدی · دنبال چی می‌گردی؟</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/*
+  paper-theme.css — زبان بصری مشترک بازی‌های روایت‌محور «شهر ابزار مالی»
+  -----------------------------------------------------------------------
+  فقط چیزهایی که در هر بازی روایت‌محور یکسان است: پس‌زمینه‌ی کاغذی، متر،
+  نقطه‌های پیشرفت، صحنه‌ها، دکمه‌ها، نمودار چرخه‌ای. کلاس‌های مخصوص یک بازی
+  (مثلاً .headline یا .round-stage) اینجا نیستند — در game-style.css خودِ
+  همان بازی می‌مانند.
+*/
+:root{
+  --paper:#F1ECDD; --paper-dim:#E7E0CC;
+  --ink:#23273A; --ink-soft:#4B4A5C;
+  --warm:#C1503D; --warm-2:#D9973B;
+  --cool:#3F7767; --cool-2:#5A8FA8;
+  --pencil:#837C68;
+  --gold:#B8813F;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:'Vazirmatn',sans-serif; line-height:1.85;
+  background-image:radial-gradient(rgba(35,39,58,0.035) 1px, transparent 1px);
+  background-size:14px 14px;
+  display:flex; flex-direction:column; min-height:100vh;
+}
+h1,h2,h3{font-weight:800; margin:0 0 .5em;}
+p{margin:0 0 1em;}
+.app{max-width:640px; margin:0 auto; width:100%; padding:1rem 1.2rem 1.4rem; flex:1; display:flex; flex-direction:column;}
+
+.back{ display:inline-block; font-size:.8rem; font-weight:600; color:var(--ink-soft); text-decoration:none; margin-bottom:.6rem; }
+.back:hover{ color:var(--warm); }
+
+/* متر بالای صفحه */
+.meter-wrap{margin:.4rem 0 .7rem;}
+.meter-labels{display:flex; justify-content:space-between; font-size:.82rem; color:var(--ink-soft); margin-bottom:.3rem;}
+.meter-bar{position:relative; height:20px; border-radius:12px; overflow:hidden; background:var(--paper-dim);}
+.meter-fill{position:absolute; top:0; bottom:0; right:0; width:50%; transition:width .6s cubic-bezier(.2,.8,.2,1);}
+.meter-tag{text-align:center; font-size:.78rem; color:var(--pencil); margin-top:.25rem; display:flex; justify-content:space-between;}
+.coin-chip{
+  display:inline-flex; align-items:center; gap:.3rem; background:var(--paper-dim);
+  border-radius:20px; padding:.15rem .7rem; font-weight:700; font-size:.8rem; color:var(--gold);
+}
+
+/* نقطه‌های پیشرفت */
+.dots{display:flex; justify-content:center; gap:.4rem; margin-bottom:.6rem; flex-wrap:wrap;}
+.dot{width:8px; height:8px; border-radius:50%; background:var(--paper-dim); border:1.5px solid var(--pencil);}
+.dot.done{background:var(--cool);}
+.dot.active{background:var(--warm); transform:scale(1.3);}
+
+/* صحنه‌ها */
+.stage{position:relative; flex:1; display:flex; align-items:stretch;}
+.scene{
+  display:none; flex-direction:column; width:100%;
+  background:var(--paper-dim); border-radius:22px 6px 22px 6px;
+  padding:1.4rem 1.4rem 1.6rem; animation:pop .45s cubic-bezier(.2,.8,.2,1);
+}
+.scene.active{display:flex;}
+@keyframes pop{ from{opacity:0; transform:translateY(14px) scale(.98);} to{opacity:1; transform:none;} }
+
+h2.scene-title{font-size:1.2rem; text-align:center;}
+.scene-sub{text-align:center; color:var(--ink-soft); font-size:.9rem; margin-bottom:.4rem;}
+.caption{font-size:.85rem; color:var(--ink-soft); text-align:center; margin-top:.5rem;}
+
+/* دکمه‌ها */
+.btn{
+  font-family:inherit; font-weight:700; font-size:.98rem;
+  padding:.6rem 1.4rem; background:var(--ink); color:var(--paper);
+  border:none; border-radius:18px 6px 18px 6px; cursor:pointer;
+}
+.btn:disabled{opacity:.4; cursor:default;}
+.btn.ghost{background:transparent; color:var(--ink); border:2px solid var(--ink);}
+.btn.warm{background:var(--warm);}
+.btn.cool{background:var(--cool);}
+.row-center{display:flex; justify-content:center; gap:.7rem; flex-wrap:wrap; margin-top:.8rem;}
+
+.char-row{display:flex; justify-content:center; gap:1rem; margin:.6rem 0;}
+.char-row svg{width:110px; height:110px;}
+
+/* نمودار چرخه‌ای کلیک‌پذیر — الگوی مشترک همه‌ی بازی‌ها */
+.cycle-wrap{position:relative; max-width:300px; margin:1rem auto 0; aspect-ratio:1/1;}
+.cycle-wrap svg.arrows{position:absolute; inset:0; width:100%; height:100%;}
+.cycle-node{position:absolute; transform:translate(-50%,-50%); width:44%; text-align:center; cursor:pointer; z-index:2;}
+.cycle-node .pt{width:13px; height:13px; border-radius:50%; background:var(--warm); margin:0 auto .35rem; transition:transform .2s;}
+.cycle-node.seen .pt{background:var(--cool);}
+.cycle-node p{font-size:.76rem; font-weight:700; margin:0;}
+.cycle-node:hover .pt{transform:scale(1.3);}
+.cycle-detail{min-height:2.6rem; text-align:center; font-size:.86rem; color:var(--ink-soft); background:var(--paper); border-radius:10px; padding:.5rem .8rem; margin-top:.6rem;}
+
+/* اسلایدر «چه می‌شد اگر» — الگوی مشترک */
+input[type=range]{width:100%; margin:.6rem 0; accent-color:var(--warm);}
+.slider-value{text-align:center; font-weight:700; color:var(--warm);}
+.friction-bar-wrap{margin-top:1rem;}
+.friction-bar{height:14px; border-radius:8px; background:var(--paper); overflow:hidden;}
+.friction-fill{height:100%; width:50%; transition:width .5s;}
+.friction-label{text-align:center; font-size:.85rem; color:var(--ink-soft); margin-top:.3rem;}
+
+/* کاربرد در زندگی واقعی — الگوی مشترک */
+.try-real{background:var(--paper); border-radius:14px; padding:1rem; margin-top:.6rem;}
+.try-real p{font-size:.88rem; margin-bottom:.5rem; text-align:center;}
+.try-real input{width:100%; padding:.6rem .8rem; border-radius:10px; border:2px solid var(--pencil); background:#fff; font-family:inherit; font-size:.92rem; margin-bottom:.6rem;}
+.real-suggestion{margin-top:.7rem; font-size:.87rem; color:var(--cool); font-weight:600; text-align:center; display:none;}
+.real-suggestion.show{display:block;}
+
+/* جمع‌بندی پایانی — الگوی مشترک */
+.result-tag{background:var(--paper); border-radius:12px; padding:.8rem 1rem; font-size:.9rem; font-weight:600; text-align:center; margin-top:.6rem;}
+.summary-list{list-style:none; padding:0; margin:1rem 0 0;}
+.summary-list li{background:var(--paper); border-radius:10px; padding:.6rem .9rem; margin-bottom:.5rem; font-size:.86rem; font-weight:600; display:flex; align-items:center; gap:.5rem;}
+.summary-list li .chk{color:var(--cool); font-weight:900;}
+
+.nav-buttons{display:flex; justify-content:space-between; margin-top:1rem; gap:.6rem;}
+.nav-buttons .btn{flex:1;}
+.next-hint{font-size:.8rem; color:var(--pencil); text-align:center; margin-top:1rem;}
+
+@media (max-width:420px){ .reveal-bars{gap:1.2rem;} }
+
+/* عدد قابل‌کشیدن (Tangle-lite) — مشترک بین همه‌ی بازی‌ها */
+.tangle-num{
+  display:inline-block; font-weight:800; color:var(--warm);
+  border-bottom:2px dashed var(--warm); cursor:ew-resize; padding:0 .1rem;
+  user-select:none; touch-action:none;
+}
+.tangle-num.dragging{ color:var(--gold); border-color:var(--gold); }
+.tangle-output{ font-weight:800; color:var(--cool); }
+.tangle-para{
+  background:var(--paper); border-radius:14px; padding:1rem 1.1rem;
+  font-size:1rem; line-height:2.1; text-align:center;
+}
+
+
+/* ---- استایل مخصوص همین بازی (game-style.css) ---- */
+/* استایل مخصوص «سوگیری تاییدی» — کلاس‌های عمومی (متر، صحنه، دکمه، چرخه، ...) در shared-src/paper-theme.css هستند */
+
+.meter-fill{ background:var(--warm-2); opacity:.6; }
+
+/* بصری مکانیزم (ذره‌بین/چشم‌بند) */
+.mech-visual{max-width:260px; margin:.6rem auto; aspect-ratio:1/1; position:relative;}
+.mech-visual svg{width:100%; height:100%;}
+
+/* دورهای انتخاب خبر */
+.scenario-box{background:var(--paper); border-radius:12px; padding:.8rem 1rem; margin-bottom:.7rem; font-size:.88rem; text-align:center;}
+.headline-grid{display:grid; grid-template-columns:1fr; gap:.55rem; margin-top:.4rem;}
+.headline{
+  background:var(--paper); border:2px solid var(--paper); border-radius:12px;
+  padding:.65rem .9rem; font-size:.87rem; font-weight:600; cursor:pointer; text-align:right;
+  transition:all .15s;
+}
+.headline:hover{border-color:var(--pencil);}
+.headline.picked{border-color:var(--ink); background:#fff;}
+.headline.picked.positive{border-color:var(--cool);}
+.headline.picked.negative{border-color:var(--warm);}
+.headline.locked{opacity:.4; cursor:default; pointer-events:none;}
+.pick-counter{text-align:center; font-size:.82rem; color:var(--ink-soft); margin-top:.5rem;}
+.round-confirm{display:flex; justify-content:center; margin-top:.7rem;}
+
+/* میله‌های مقایسه‌ی «اطمینان در برابر واقعیت» */
+.reveal-bars{display:flex; justify-content:center; gap:2.2rem; margin:1rem 0;}
+.reveal-col{text-align:center;}
+.reveal-track{width:46px; height:140px; background:var(--paper); border-radius:10px; position:relative; overflow:hidden; margin:0 auto;}
+.reveal-fill{position:absolute; bottom:0; right:0; left:0; border-radius:10px 10px 0 0; transition:height .8s cubic-bezier(.2,.8,.2,1);}
+.reveal-fill.confidence{background:var(--warm-2);}
+.reveal-fill.truth{background:var(--cool);}
+.reveal-label{font-size:.8rem; font-weight:700; margin-top:.4rem;}
+.reveal-value{font-size:.95rem; font-weight:800;}
+.gap-note{text-align:center; font-size:.87rem; background:var(--paper); border-radius:10px; padding:.7rem 1rem; margin-top:.4rem;}
+
+/* صحنه‌ی آینه‌ی زندگی واقعی */
+.mirror-box{background:var(--paper); border-radius:14px; padding:1rem; margin:.6rem 0;}
+.mirror-box p{font-size:.88rem; text-align:center; margin-bottom:.6rem;}
+.mirror-choices{display:flex; gap:.6rem; justify-content:center; flex-wrap:wrap;}
+.mirror-choices .btn{flex:1; min-width:120px; max-width:220px;}
+.mirror-feedback{min-height:2.4rem; text-align:center; font-size:.85rem; color:var(--ink-soft); margin-top:.6rem;}
+
+</style>
+</head>
+<body>
+<div class="app" data-title="سوگیری تاییدی · دنبال چی می‌گردی؟">
+  <a class="back" href="../../dashboard.html">← بازگشت به داشبورد</a>
+
+  <div class="meter-wrap">
+    <div class="meter-labels"><span>🔍 واقع‌بین</span><span>🕶️ فقط چیزی که می‌خوام ببینم</span></div>
+    <div class="meter-bar"><div class="meter-fill" id="meterFill"></div></div>
+    <div class="meter-tag"><span id="meterTag">اطمینان تو: ۵۰٪</span></div>
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <div class="stage" id="stage">
+
+    <!-- 0: intro -->
+    <section class="scene active" data-scene="intro">
+      <h2 class="scene-title">دنبال چی می‌گردی؟</h2>
+      <div class="char-row"><svg id="cIntro" viewBox="0 0 200 200"></svg></div>
+      <p class="scene-sub">دو ماه پیش، شهریار سهام یه شرکت تازه رو خرید. مطمئن بود این سهم رشد می‌کنه.</p>
+      <p class="caption">از اون موقع، هرروز چندتا خبر درباره‌ی این شرکت منتشر می‌شه. شهریار وقت نداره همه‌شون رو بخونه — باید انتخاب کنه کدوم‌ها رو بخونه.</p>
+      <div class="row-center"><button class="btn warm" id="introNext">بیا جای شهریار تصمیم بگیریم</button></div>
+    </section>
+
+    <!-- 1: mechanism -->
+    <section class="scene" data-scene="mechanism">
+      <h2 class="scene-title">مغز ما یه فیلتر داره</h2>
+      <div class="mech-visual"><svg id="mechSvg" viewBox="0 0 200 200"></svg></div>
+      <p class="caption">وقتی از قبل به چیزی باور داری، مغزت ناخودآگاه دنبال شواهدی می‌گرده که همون باور رو تایید کنه — و از کنار شواهد مخالف راحت‌تر رد می‌شه. به این می‌گن «سوگیری تاییدی». تو ۳ دور بعدی، ببین خودت چقدر تحتِ تاثیرشی.</p>
+    </section>
+
+    <!-- 2,3,4: headline rounds -->
+    <section class="scene" data-scene="round-1" data-round="1">
+      <h2 class="scene-title">هفته‌ی اول</h2>
+      <div class="scenario-box">۴ خبر منتشر شده. وقت داری فقط ۲ تا رو بخونی.</div>
+      <div class="headline-grid" id="headlines-1"></div>
+      <div class="pick-counter" id="pickCounter-1">۰ از ۲ خبر انتخاب شد</div>
+      <div class="round-confirm"><button class="btn cool" id="confirmRound-1" disabled>ادامه</button></div>
+    </section>
+
+    <section class="scene" data-scene="round-2" data-round="2">
+      <h2 class="scene-title">هفته‌ی دوم</h2>
+      <div class="scenario-box">باز هم ۴ خبر جدید. باز هم فقط وقت ۲ تا رو داری.</div>
+      <div class="headline-grid" id="headlines-2"></div>
+      <div class="pick-counter" id="pickCounter-2">۰ از ۲ خبر انتخاب شد</div>
+      <div class="round-confirm"><button class="btn cool" id="confirmRound-2" disabled>ادامه</button></div>
+    </section>
+
+    <section class="scene" data-scene="round-3" data-round="3">
+      <h2 class="scene-title">هفته‌ی سوم</h2>
+      <div class="scenario-box">آخرین دور. همون قانون: ۲ خبر از ۴ تا.</div>
+      <div class="headline-grid" id="headlines-3"></div>
+      <div class="pick-counter" id="pickCounter-3">۰ از ۲ خبر انتخاب شد</div>
+      <div class="round-confirm"><button class="btn cool" id="confirmRound-3" disabled>ادامه</button></div>
+    </section>
+
+    <!-- 5: reveal gap -->
+    <section class="scene" data-scene="reveal">
+      <h2 class="scene-title">حالا بیا مقایسه کنیم</h2>
+      <p class="scene-sub">اینم دو عدد: چقدر مطمئن بودی، در برابر واقعیتی که همون موقع داشت اتفاق می‌افتاد.</p>
+      <div class="reveal-bars">
+        <div class="reveal-col">
+          <div class="reveal-track"><div class="reveal-fill confidence" id="fillConfidence" style="height:50%;"></div></div>
+          <div class="reveal-label">اطمینان تو</div>
+          <div class="reveal-value" id="valConfidence">۵۰٪</div>
+        </div>
+        <div class="reveal-col">
+          <div class="reveal-track"><div class="reveal-fill truth" id="fillTruth" style="height:50%;"></div></div>
+          <div class="reveal-label">وضعیت واقعی شرکت</div>
+          <div class="reveal-value" id="valTruth">۵۰٪</div>
+        </div>
+      </div>
+      <div class="gap-note" id="gapNote">—</div>
+    </section>
+
+    <!-- 6: cycle -->
+    <section class="scene" data-scene="cycle">
+      <h2 class="scene-title">چرخه‌ای که خودش رو تقویت می‌کنه</h2>
+      <p class="scene-sub">روی هر مرحله بزن.</p>
+      <div class="cycle-wrap" id="cycle">
+        <svg class="arrows" id="cycleSvg" viewBox="0 0 100 100"></svg>
+        <div class="cycle-node" data-i="0"><div class="pt"></div><p>یه باور اولیه داری</p></div>
+        <div class="cycle-node" data-i="1"><div class="pt"></div><p>ناخودآگاه دنبال خبر هم‌راستا می‌گردی</p></div>
+        <div class="cycle-node" data-i="2"><div class="pt"></div><p>خبر مخالف رو کم‌اهمیت می‌بینی یا رد می‌کنی</p></div>
+        <div class="cycle-node" data-i="3"><div class="pt"></div><p>باورت قوی‌تر می‌شه</p></div>
+        <div class="cycle-node" data-i="4"><div class="pt"></div><p>حالا مطمئن‌تر دنبال تاییدِ بیشتر می‌گردی</p></div>
+        <div class="cycle-node" data-i="5"><div class="pt"></div><p>فاصله‌ی بین باور و واقعیت بیشتر می‌شه</p></div>
+      </div>
+      <div class="cycle-detail" id="cycleDetail">برای دیدنِ توضیح، روی یکی از مرحله‌ها بزن.</div>
+    </section>
+
+    <!-- 7: slider -->
+    <section class="scene" data-scene="prior">
+      <h2 class="scene-title">هرچی باورت قوی‌تر باشه...</h2>
+      <p class="scene-sub">قبل از این ماجرا، چقدر به این شرکت باور داشتی؟</p>
+      <input type="range" id="priorSlider" min="0" max="100" value="50">
+      <div class="slider-value" id="priorLabel">۵۰٪ باور اولیه</div>
+      <div class="friction-bar-wrap">
+        <div class="friction-bar"><div class="friction-fill" id="priorFill"></div></div>
+        <div class="friction-label" id="priorCaption">—</div>
+      </div>
+      <p class="caption">هرچی باور اولیه قوی‌تر باشه، فیلترِ ذهنی هم قوی‌تر کار می‌کنه — و متوجه نمی‌شی داری فیلتر می‌کنی. برای همینه که آدم‌های باتجربه هم گاهی همین اشتباه رو می‌کنن؛ تجربه، باور رو قوی‌تر می‌کنه، نه لزوماً دقیق‌تر.</p>
+    </section>
+
+    <!-- 8: life mirror -->
+    <section class="scene" data-scene="mirror">
+      <h2 class="scene-title">همین اتفاق با آدم‌ها هم می‌افته</h2>
+      <div class="mirror-box">
+        <p>یه همکار جدید اومده که از همون روز اول ازش خوشت اومده. این هفته یه اشتباه بزرگ کرد. با خودت چی می‌گی؟</p>
+        <div class="mirror-choices">
+          <button class="btn cool" data-choice="excuse">«حتماً یه دلیلی داشته، آدم خوبیه»</button>
+          <button class="btn warm" data-choice="doubt">«خب، شاید اولین تصورم اشتباه بوده»</button>
+        </div>
+        <div class="mirror-feedback" id="mirrorFeedback"></div>
+      </div>
+      <div class="try-real">
+        <p>یه باوری که این روزها داری (درباره‌ی یه آدم، یه سرمایه‌گذاری، یا یه تصمیم) و شاید فقط دنبال تاییدشی رو بنویس:</p>
+        <input type="text" id="realBelief" placeholder="مثلاً: مطمئنم این تامین‌کننده قابل‌اعتماده">
+        <div class="row-center"><button class="btn cool" id="realBtn">یه سؤال چالشی بهم بده</button></div>
+        <div class="real-suggestion" id="realSuggestion"></div>
+      </div>
+    </section>
+
+    <!-- 9: summary -->
+    <section class="scene" data-scene="summary">
+      <h2 class="scene-title">جمع‌بندی</h2>
+      <div class="mech-visual" style="max-width:180px;"><svg id="svgSummary" viewBox="0 0 200 200"></svg></div>
+      <div class="result-tag" id="resultTag"></div>
+      <ul class="summary-list">
+        <li><span class="chk">✓</span> قبل از تصمیم مهم، عمداً دنبال یه خبر بد بگرد</li>
+        <li><span class="chk">✓</span> از خودت بپرس: «چه چیزی می‌تونه نظرمو عوض کنه؟»</li>
+        <li><span class="chk">✓</span> به کسی که مخالف نظرته، واقعاً گوش بده</li>
+        <li><span class="chk">✓</span> بین «امیدوارم درست باشه» و «مطمئنم درسته» فرق بذار</li>
+      </ul>
+      <div class="row-center" style="margin-top:1rem;"><button class="btn ghost" id="replayBtn">دوباره بازی کن</button></div>
+      <p class="next-hint">این «سوگیری تاییدی» بود. بازی بعدی می‌تونه یه سوگیری دیگه باشه.</p>
+    </section>
+
+  </div>
+
+  <div class="nav-buttons">
+    <button class="btn ghost" id="prevBtn">قبلی</button>
+    <button class="btn" id="nextBtn">بعدی</button>
+  </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/rough.js/2.1.1/rough.umd.min.js"></script>
+
+<script>
+/*
+  draw-helpers.js — جعبه‌ابزار رسم مشترک برای بازی‌های روایت‌محور «شهر ابزار مالی»
+  ---------------------------------------------------------------------------
+  تمام تصویرسازی با rough.js انجام می‌شود؛ هیچ فایل عکسی لازم نیست.
+  این فایل را هیچ بازی‌ای نباید کپی/بازنویسی کند — فقط از window.FCDraw استفاده کند.
+  پیش‌نیاز: <script src=".../rough.umd.min.js"> باید قبل از این فایل لود شده باشد.
+*/
+(function (global) {
+  'use strict';
+
+  if (typeof rough === 'undefined') {
+    console.error('rough.js لود نشده — draw-helpers.js نمی‌تواند کار کند.');
+    return;
+  }
+
+  var faDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+  function toFa(n){ return String(n).replace(/[0-9]/g, function(d){ return faDigits[d]; }); }
+
+  function rc(svg){ return rough.svg(svg); }
+
+  /* ---------- صورتک (شخصیت‌ها) ---------- */
+  // mood: 'happy' | 'neutral' | 'sad' | 'sly'
+  function drawFace(svg, cx, cy, scale, color, mood, ink){
+    scale = scale || 1; ink = ink || '#23273A';
+    var g = rc(svg);
+    svg.appendChild(g.circle(cx, cy, 70*scale, {fill:color, fillStyle:'hachure', hachureGap:4, stroke:ink, strokeWidth:2, roughness:1.9}));
+    var eyeSize = mood==='sly' ? 3 : 5;
+    var eyeL=[cx-20*scale, cy-8*scale], eyeR=[cx+20*scale, cy-8*scale];
+    if (mood==='sly'){
+      svg.appendChild(g.line(eyeL[0]-6*scale,eyeL[1],eyeL[0]+6*scale,eyeL[1],{stroke:ink,strokeWidth:2.4,roughness:1.6}));
+      svg.appendChild(g.line(eyeR[0]-6*scale,eyeR[1],eyeR[0]+6*scale,eyeR[1],{stroke:ink,strokeWidth:2.4,roughness:1.6}));
+    } else {
+      svg.appendChild(g.circle(eyeL[0],eyeL[1],eyeSize*scale,{fill:ink,fillStyle:'solid',stroke:'none'}));
+      svg.appendChild(g.circle(eyeR[0],eyeR[1],eyeSize*scale,{fill:ink,fillStyle:'solid',stroke:'none'}));
+    }
+    var mouth=[cx, cy+22*scale], mpath;
+    if (mood==='happy'){
+      mpath = 'M '+(mouth[0]-16*scale)+' '+mouth[1]+' Q '+mouth[0]+' '+(mouth[1]+14*scale)+' '+(mouth[0]+16*scale)+' '+mouth[1];
+    } else if (mood==='sad'){
+      mpath = 'M '+(mouth[0]-16*scale)+' '+(mouth[1]+8*scale)+' Q '+mouth[0]+' '+(mouth[1]-8*scale)+' '+(mouth[0]+16*scale)+' '+(mouth[1]+8*scale);
+    } else if (mood==='sly'){
+      mpath = 'M '+(mouth[0]-14*scale)+' '+mouth[1]+' Q '+(mouth[0]+4*scale)+' '+(mouth[1]+10*scale)+' '+(mouth[0]+18*scale)+' '+(mouth[1]-6*scale);
+    } else {
+      mpath = 'M '+(mouth[0]-14*scale)+' '+mouth[1]+' L '+(mouth[0]+14*scale)+' '+mouth[1];
+    }
+    svg.appendChild(g.path(mpath,{stroke:ink,strokeWidth:2.2,roughness:1.6,fill:'none'}));
+  }
+
+  /* ---------- سکه ---------- */
+  function drawCoin(svg, cx, cy, r, color, ink){
+    ink = ink || '#23273A';
+    var g = rc(svg);
+    svg.appendChild(g.circle(cx, cy, r*2, {fill:color, fillStyle:'hachure', hachureGap:2.5, stroke:ink, strokeWidth:1.8, roughness:1.7}));
+    svg.appendChild(g.circle(cx, cy, r*1.1, {stroke:ink, strokeWidth:1.2, roughness:1.5, fill:'none'}));
+  }
+
+  /* ---------- دست‌دادن ---------- */
+  function drawHandshake(svg, cx, cy, scale, color){
+    scale = scale || 1;
+    var g = rc(svg);
+    svg.appendChild(g.line(cx-30*scale, cy, cx-4*scale, cy-6*scale, {stroke:color, strokeWidth:5*scale, roughness:1.7}));
+    svg.appendChild(g.line(cx+30*scale, cy, cx+4*scale, cy-6*scale, {stroke:color, strokeWidth:5*scale, roughness:1.7}));
+    svg.appendChild(g.ellipse(cx, cy-6*scale, 14*scale, 9*scale, {fill:color, fillStyle:'solid', stroke:'#23273A', strokeWidth:1.4, roughness:1.5}));
+  }
+
+  /* ---------- آینه (برای شخصیتِ «تکرارگر») ---------- */
+  function drawMirror(svg, cx, cy, scale, color){
+    scale = scale || 1;
+    var g = rc(svg);
+    svg.appendChild(g.rectangle(cx-18*scale, cy-24*scale, 36*scale, 48*scale, {fill:color, fillStyle:'hachure', hachureGap:3, stroke:'#23273A', strokeWidth:1.8, roughness:1.8}));
+    svg.appendChild(g.line(cx, cy-24*scale, cx, cy+24*scale, {stroke:'#23273A', strokeWidth:1.2, roughness:1.4}));
+  }
+
+  /* ---------- ذره‌بین / چشم‌بند (برای سوگیری‌های شناختی) ---------- */
+  function drawMagnifier(svg, cx, cy, scale, color){
+    scale = scale || 1;
+    var g = rc(svg);
+    svg.appendChild(g.circle(cx-10*scale, cy-10*scale, 46*scale, {stroke:color, strokeWidth:3.5, roughness:1.6, fill:'none'}));
+    svg.appendChild(g.line(cx+16*scale, cy+16*scale, cx+40*scale, cy+40*scale, {stroke:color, strokeWidth:5*scale, roughness:1.6}));
+  }
+  function drawEyePatch(svg, cx, cy, scale, color){
+    scale = scale || 1;
+    var g = rc(svg);
+    svg.appendChild(g.ellipse(cx, cy, 40*scale, 26*scale, {fill:color, fillStyle:'cross-hatch', hachureGap:3, stroke:'#23273A', strokeWidth:1.8, roughness:1.7}));
+  }
+
+  /* ---------- فلش خمیده (برای نمودار چرخه‌ای) ---------- */
+  function arrowHead(g, svg, x,y,angle,size,color){
+    size = size || 8;
+    var a1=angle+Math.PI*0.78, a2=angle-Math.PI*0.78;
+    svg.appendChild(g.line(x,y,x+size*Math.cos(a1),y+size*Math.sin(a1),{stroke:color,strokeWidth:2,roughness:1.6}));
+    svg.appendChild(g.line(x,y,x+size*Math.cos(a2),y+size*Math.sin(a2),{stroke:color,strokeWidth:2,roughness:1.6}));
+  }
+  function curvedArrow(svg, x1,y1, x2,y2, color, opts){
+    opts = opts || {};
+    var g = rc(svg);
+    var mx=(x1+x2)/2+(opts.bend||0), my=(y1+y2)/2+(opts.bendY||0);
+    svg.appendChild(g.path('M '+x1+' '+y1+' Q '+mx+' '+my+' '+x2+' '+y2, {stroke:color, strokeWidth:2.2, roughness:1.4, bowing:1}));
+    arrowHead(g, svg, x2, y2, Math.atan2(y2-my, x2-mx), 9, color);
+  }
+
+  /* ---------- کمکی: نمودار چرخه‌ای کلیک‌پذیر با گره‌های دایره‌ای ---------- */
+  // positions: آرایه‌ی {top, left} به‌صورت درصد؛ اگر ندهید، خودکار روی یک دایره می‌چیند
+  function layoutCycleNodes(nodeEls, positions){
+    var defaultPos = [
+      {top:'4%',left:'50%'},{top:'22%',left:'88%'},{top:'62%',left:'94%'},
+      {top:'92%',left:'62%'},{top:'80%',left:'18%'},{top:'34%',left:'8%'}
+    ];
+    var pos = positions || defaultPos;
+    nodeEls.forEach(function(el, i){
+      var p = pos[i % pos.length];
+      el.style.top = p.top; el.style.left = p.left;
+    });
+  }
+  function drawCycleArrows(svg, count, color){
+    svg.innerHTML = '';
+    var pts = [{x:50,y:8},{x:86,y:26},{x:92,y:66},{x:60,y:92},{x:22,y:80},{x:10,y:36}];
+    for (var i=0;i<count;i++){
+      var a=pts[i % pts.length], b=pts[(i+1) % count];
+      curvedArrow(svg, a.x, a.y, b.x, b.y, color, {});
+    }
+  }
+
+  global.FCDraw = {
+    toFa: toFa,
+    rc: rc,
+    drawFace: drawFace,
+    drawCoin: drawCoin,
+    drawHandshake: drawHandshake,
+    drawMirror: drawMirror,
+    drawMagnifier: drawMagnifier,
+    drawEyePatch: drawEyePatch,
+    curvedArrow: curvedArrow,
+    layoutCycleNodes: layoutCycleNodes,
+    drawCycleArrows: drawCycleArrows
+  };
+})(window);
+
+</script>
+<script>
+/*
+  scene-engine.js — موتور عمومی ناوبری صحنه برای بازی‌های روایت‌محور
+  ------------------------------------------------------------------
+  این فایل هیچ چیز مخصوص یک بازی خاص (متر، شخصیت، امتیاز) را نمی‌داند —
+  فقط مسئول ناوبری بین صحنه‌ها، نقطه‌های پیشرفت، و صدا زدن callback هر بازی است.
+  منطق مخصوص هر بازی (رسم، محاسبه‌ی متر، ...) در game-logic.js خودِ همان بازی می‌ماند.
+
+  نحوه‌ی استفاده:
+    var engine = FCScene.init({
+      sceneSelector: '.scene',
+      dotsSelector: '#dots',
+      prevBtnId: 'prevBtn',
+      nextBtnId: 'nextBtn',
+      onEnter: function(index, sceneName){ ... },   // هر بار وارد صحنه‌ی جدید می‌شویم
+      onFinish: function(){ location.reload(); }     // وقتی از آخرین صحنه «بعدی» زده شود
+    });
+    engine.goto(3);          // پرش دستی به صحنه‌ی شماره‌ی ۴ (اندیس از صفر)
+    engine.current();        // اندیس صحنه‌ی فعلی
+*/
+(function (global) {
+  'use strict';
+
+  function init(config){
+    var scenes = Array.from(document.querySelectorAll(config.sceneSelector));
+    var dotsEl = document.querySelector(config.dotsSelector);
+    var prevBtn = document.getElementById(config.prevBtnId);
+    var nextBtn = document.getElementById(config.nextBtnId);
+    var current = 0;
+
+    scenes.forEach(function(){
+      var d = document.createElement('div');
+      d.className = 'dot';
+      dotsEl.appendChild(d);
+    });
+    var dots = Array.from(dotsEl.children);
+
+    function updateDots(){
+      dots.forEach(function(d, i){
+        d.classList.toggle('active', i === current);
+        d.classList.toggle('done', i < current);
+      });
+    }
+
+    function sceneName(i){
+      return scenes[i].dataset.scene || '';
+    }
+
+    function goto(i){
+      if (i < 0 || i >= scenes.length) return;
+      scenes[current].classList.remove('active');
+      current = i;
+      scenes[current].classList.add('active');
+      if (prevBtn) prevBtn.disabled = (current === 0);
+      if (nextBtn) nextBtn.textContent = (current === scenes.length - 1)
+        ? (config.finishLabel || 'دوباره از اول')
+        : (config.nextLabel || 'بعدی');
+      updateDots();
+      if (typeof config.onEnter === 'function') config.onEnter(current, sceneName(current));
+    }
+
+    if (prevBtn){
+      prevBtn.addEventListener('click', function(){ goto(current - 1); });
+    }
+    if (nextBtn){
+      nextBtn.addEventListener('click', function(){
+        if (current === scenes.length - 1){
+          if (typeof config.onFinish === 'function') config.onFinish();
+          else location.reload();
+          return;
+        }
+        goto(current + 1);
+      });
+    }
+
+    // مقداردهی اولیه
+    if (prevBtn) prevBtn.disabled = true;
+    updateDots();
+    if (typeof config.onEnter === 'function') config.onEnter(current, sceneName(current));
+
+    return {
+      goto: goto,
+      current: function(){ return current; },
+      sceneCount: function(){ return scenes.length; },
+      advance: function(){
+        if (nextBtn) nextBtn.click();
+      }
+    };
+  }
+
+  global.FCScene = { init: init };
+})(window);
+
+</script>
+<script>
+/*
+  tangle-lite.js — نسخه‌ی سبک الهام‌گرفته از Tangle.js برت ویکتور
+  ------------------------------------------------------------------
+  به‌جای اسلایدر جدا، عدد داخل خودِ جمله «قابل‌کشیدن» می‌شود — دقیقاً فلسفه‌ی
+  «سند واکنش‌گرا»ی برت ویکتور. کاربر روی عدد می‌کشد (چپ/راست یا بالا/پایین)
+  و همان لحظه مقدار عوض می‌شود.
+
+  نشانه‌گذاری در scenes.html:
+    <span class="tangle-num" data-var="years" data-val="10" data-min="1" data-max="40" data-step="1" data-unit=" سال">۱۰ سال</span>
+
+  نحوه‌ی استفاده در game-logic.js:
+    FCTangle.init('#sceneId', function(varName, value){
+      // اینجا محاسبه‌ی دوباره + به‌روزرسانی خروجی‌ها/نمودار
+    });
+
+  خروجی‌های وابسته (که فقط باید متن‌شون به‌روز بشه، قابل‌کشیدن نیستن):
+    <span class="tangle-output" id="outCoins">—</span>
+*/
+(function (global) {
+  'use strict';
+
+  function setDisplay(el){
+    var val = parseFloat(el.dataset.val);
+    var unit = el.dataset.unit || '';
+    var text = (global.FCDraw ? global.FCDraw.toFa(val) : val) + unit;
+    el.textContent = text;
+  }
+
+  function init(rootSelector, onChange){
+    var root = typeof rootSelector === 'string' ? document.querySelector(rootSelector) : rootSelector;
+    if (!root) return;
+    var nums = Array.from(root.querySelectorAll('.tangle-num'));
+
+    nums.forEach(function(el){
+      setDisplay(el);
+      var min = parseFloat(el.dataset.min), max = parseFloat(el.dataset.max), step = parseFloat(el.dataset.step || '1');
+      var dragging = false, startX = 0, startVal = 0;
+
+      function clientX(e){ return e.touches ? e.touches[0].clientX : e.clientX; }
+
+      function down(e){
+        dragging = true;
+        startX = clientX(e);
+        startVal = parseFloat(el.dataset.val);
+        el.classList.add('dragging');
+        e.preventDefault();
+      }
+      function move(e){
+        if (!dragging) return;
+        var dx = clientX(e) - startX;
+        var delta = Math.round(dx / 8) * step; // هر ۸ پیکسل یک گام
+        var val = Math.max(min, Math.min(max, startVal + delta));
+        if (val !== parseFloat(el.dataset.val)){
+          el.dataset.val = val;
+          setDisplay(el);
+          if (typeof onChange === 'function') onChange(el.dataset.var, val);
+        }
+        e.preventDefault();
+      }
+      function up(){
+        dragging = false;
+        el.classList.remove('dragging');
+      }
+
+      el.addEventListener('mousedown', down);
+      el.addEventListener('touchstart', down, {passive:false});
+      window.addEventListener('mousemove', move);
+      window.addEventListener('touchmove', move, {passive:false});
+      window.addEventListener('mouseup', up);
+      window.addEventListener('touchend', up);
+    });
+
+    // مقدار اولیه‌ی همه‌ی خروجی‌های وابسته را هم یک‌بار محاسبه کن
+    if (typeof onChange === 'function' && nums.length){
+      onChange(nums[0].dataset.var, parseFloat(nums[0].dataset.val));
+    }
+  }
+
+  function getValues(rootSelector){
+    var root = typeof rootSelector === 'string' ? document.querySelector(rootSelector) : rootSelector;
+    var out = {};
+    Array.from(root.querySelectorAll('.tangle-num')).forEach(function(el){
+      out[el.dataset.var] = parseFloat(el.dataset.val);
+    });
+    return out;
+  }
+
+  global.FCTangle = { init: init, getValues: getValues };
+})(window);
+
+</script>
+<script>
+
+/* ---- game-logic.js ---- */
+(function(){
+  var toFa = FCDraw.toFa;
+  var css = getComputedStyle(document.documentElement);
+  var WARM=css.getPropertyValue('--warm').trim(), WARM2=css.getPropertyValue('--warm-2').trim(),
+      COOL=css.getPropertyValue('--cool').trim();
+
+  /* ---------- state ---------- */
+  var confidence = 50;
+  var truthValue = 60; // وضعیت واقعی شرکت، مستقل از انتخاب کاربر
+  var negativesSkipped = 0;
+  var roundPicks = { 1:[], 2:[], 3:[] };
+
+  function updateMeter(){
+    var v = Math.max(5, Math.min(95, confidence));
+    document.getElementById('meterFill').style.width = v+'%';
+    document.getElementById('meterTag').textContent = 'اطمینان تو: ' + toFa(Math.round(v)) + '٪';
+  }
+
+  /* ---------- Headline rounds ---------- */
+  var headlineData = {
+    1: [
+      { text:'تحلیلگر معروف: سهم می‌تونه دوبرابر بشه', sentiment:'positive' },
+      { text:"مدیرعامل: «بهترین فصل تاریخ شرکت پیش رومونه»", sentiment:'positive' },
+      { text:'گزارش داخلی: تأخیر در پرداخت به تأمین‌کننده‌ها', sentiment:'negative' },
+      { text:'دو مدیر ارشد این هفته استعفا دادن', sentiment:'negative' }
+    ],
+    2: [
+      { text:'قرارداد جدید با یه شرکت بزرگ بسته شد (جزئیات مبهم)', sentiment:'positive' },
+      { text:'کاربرها تو شبکه‌های اجتماعی خیلی هیجان‌زده‌ن', sentiment:'positive' },
+      { text:'حسابرس مستقل: صورت‌های مالی نیاز به بازبینی دارن', sentiment:'negative' },
+      { text:'رقیب اصلی قیمتش رو ۳۰٪ کاهش داد', sentiment:'negative' }
+    ],
+    3: [
+      { text:'شایعه: ممکنه توسط یه شرکت بزرگ خریداری بشه', sentiment:'positive' },
+      { text:'قیمت سهم امروز ۵٪ رشد کرد', sentiment:'positive' },
+      { text:'شرکت اعلام کرد نمی‌تونه پیش‌بینی سود سه‌ماهه بده', sentiment:'negative' },
+      { text:'بانک اصلی، خط اعتباری شرکت رو قطع کرد', sentiment:'negative' }
+    ]
+  };
+  var hiddenTruthDelta = { 1:-12, 2:-16, 3:-20 };
+
+  function initRound(n){
+    var container = document.getElementById('headlines-'+n);
+    container.innerHTML = '';
+    roundPicks[n] = [];
+    headlineData[n].forEach(function(h, idx){
+      var el = document.createElement('div');
+      el.className = 'headline';
+      el.textContent = h.text;
+      el.addEventListener('click', function(){
+        if (el.classList.contains('locked')) return;
+        var pos = roundPicks[n].indexOf(idx);
+        if (pos >= 0){
+          roundPicks[n].splice(pos,1);
+          el.classList.remove('picked','positive','negative');
+        } else {
+          if (roundPicks[n].length >= 2) return;
+          roundPicks[n].push(idx);
+          el.classList.add('picked', h.sentiment);
+        }
+        document.getElementById('pickCounter-'+n).textContent = toFa(roundPicks[n].length) + ' از ۲ خبر انتخاب شد';
+        document.getElementById('confirmRound-'+n).disabled = roundPicks[n].length !== 2;
+      });
+      container.appendChild(el);
+    });
+  }
+
+  function confirmRound(n){
+    var picks = roundPicks[n], data = headlineData[n];
+    picks.forEach(function(idx){
+      confidence += data[idx].sentiment==='positive' ? 10 : -10;
+    });
+    data.forEach(function(h, idx){
+      if (h.sentiment==='negative' && picks.indexOf(idx)===-1) negativesSkipped++;
+    });
+    truthValue = Math.max(5, truthValue + hiddenTruthDelta[n]);
+    updateMeter();
+    Array.from(document.getElementById('headlines-'+n).children).forEach(function(el){ el.classList.add('locked'); });
+    engine.goto(engine.current()+1);
+  }
+  [1,2,3].forEach(function(n){
+    document.getElementById('confirmRound-'+n).addEventListener('click', function(){ confirmRound(n); });
+  });
+
+  /* ---------- reveal ---------- */
+  function renderReveal(){
+    var c = Math.max(5, Math.min(95, confidence)), t = Math.max(5, Math.min(95, truthValue));
+    document.getElementById('fillConfidence').style.height = c+'%';
+    document.getElementById('fillTruth').style.height = t+'%';
+    document.getElementById('valConfidence').textContent = toFa(Math.round(c)) + '٪';
+    document.getElementById('valTruth').textContent = toFa(Math.round(t)) + '٪';
+    var gap = Math.round(c - t), note;
+    if (gap > 15) note = 'تو ' + toFa(negativesSkipped) + ' خبر منفی رو از عمد نخوندی. اطمینانت ' + toFa(Math.abs(gap)) + ' واحد بیشتر از واقعیت بود — این دقیقاً همون سوگیری تاییدیه.';
+    else if (gap < -15) note = 'جالبه — این‌بار حتی از واقعیت هم بدبین‌تر بودی. سوگیری همیشه به سمت خوش‌بینی نیست.';
+    else note = 'تعادل خوبی داشتی — اطمینانت تقریباً با واقعیت هم‌خونی داشت.';
+    document.getElementById('gapNote').textContent = note;
+  }
+
+  /* ---------- cycle ---------- */
+  var cycleDetails = [
+    'یه باور اولیه داری — مثلاً «این سهم خوبه» یا «این آدم قابل‌اعتماده».',
+    'مغزت، اغلب بدون اینکه بفهمی، دنبال خبر یا نشونه‌ای می‌گرده که همون باور رو تایید کنه.',
+    'وقتی به خبر مخالف برمی‌خوری، راحت‌تر ازش رد می‌شی یا کم‌اهمیتش می‌دونی.',
+    'چون فقط شواهدِ هم‌راستا دیدی، باورت قوی‌تر می‌شه.',
+    'حالا با اطمینان بیشتر، باز هم دنبال تاییدِ بیشتر می‌گردی.',
+    'فاصله‌ی بین چیزی که فکر می‌کنی و چیزی که واقعاً هست، بیشتر و بیشتر می‌شه.'
+  ];
+  var cycleReady = false;
+  function setupCycle(){
+    if (cycleReady) return;
+    cycleReady = true;
+    FCDraw.layoutCycleNodes(Array.from(document.querySelectorAll('.cycle-node')));
+    Array.from(document.querySelectorAll('.cycle-node')).forEach(function(el,i){
+      el.addEventListener('click', function(){
+        document.getElementById('cycleDetail').textContent = cycleDetails[i];
+        el.classList.add('seen');
+      });
+    });
+  }
+
+  /* ---------- prior slider ---------- */
+  var priorSlider = document.getElementById('priorSlider');
+  function renderPrior(){
+    var v = parseInt(priorSlider.value,10);
+    document.getElementById('priorLabel').textContent = toFa(v) + '٪ باور اولیه';
+    document.getElementById('priorFill').style.width = v + '%';
+    var cap;
+    if (v < 30) cap = 'باور کمی داشتی — به‌احتمال زیاد به خبر منفی هم توجه می‌کردی.';
+    else if (v < 70) cap = 'باور متوسطی داشتی — فیلترِ ذهنی داره کم‌کم شکل می‌گیره.';
+    else cap = 'خیلی به این باور داشتی — فیلترِ ذهنی داشت خودکار کار می‌کرد، حتی بدون اینکه بفهمی.';
+    document.getElementById('priorCaption').textContent = cap;
+  }
+  priorSlider.addEventListener('input', renderPrior);
+
+  /* ---------- mirror + real-life ---------- */
+  Array.from(document.querySelectorAll('.mirror-choices .btn')).forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var fb = document.getElementById('mirrorFeedback');
+      fb.textContent = btn.dataset.choice === 'excuse'
+        ? 'شاید حق با تو باشه — ولی همین جمله دقیقاً همون فیلتریه که تو دور اول دیدیم. آیا واقعاً شواهد رو سنجیدی، یا فقط باور اولیه‌ت رو محکم‌تر کردی؟'
+        : 'این سؤال، دقیقاً کاریه که سوگیری تاییدی رو خنثی می‌کنه — پرسیدن «شاید تصور اولم اشتباه بوده؟»';
+    });
+  });
+  document.getElementById('realBtn').addEventListener('click', function(){
+    var v = document.getElementById('realBelief').value.trim();
+    var box = document.getElementById('realSuggestion');
+    if (!v){ box.textContent = 'اول یه باور بنویس :)'; box.classList.add('show'); return; }
+    box.textContent = 'درباره‌ی «' + v + '»: یه سؤال از خودت بپرس که واقعاً می‌تونه نظرتو عوض کنه — نه سؤالی که از قبل می‌دونی جوابش چیه.';
+    box.classList.add('show');
+  });
+
+  /* ---------- summary ---------- */
+  function drawSummary(){
+    var svg = document.getElementById('svgSummary'); svg.innerHTML='';
+    var gap = confidence - truthValue;
+    if (Math.abs(gap) <= 15) FCDraw.drawFace(svg, 100, 100, 0.8, '#CFE0D4', 'happy');
+    else FCDraw.drawFace(svg, 100, 100, 0.8, '#E7C7BE', gap>0 ? 'sly' : 'sad');
+  }
+  function showResult(){
+    var gap = Math.round(confidence - truthValue), msg;
+    if (gap > 15) msg = 'اطمینانت ' + toFa(gap) + ' واحد بیشتر از واقعیت بود، و ' + toFa(negativesSkipped) + ' خبر منفی رو ندیده گرفتی — نمونه‌ی کلاسیک سوگیری تاییدی.';
+    else if (gap < -15) msg = 'این‌بار از واقعیت هم بدبین‌تر بودی — یادت باشه سوگیری فقط به سمت خوش‌بینی نیست.';
+    else msg = 'اطمینانت (' + toFa(Math.round(confidence)) + '٪) تقریباً با واقعیت (' + toFa(Math.round(truthValue)) + '٪) هم‌خونی داشت — تعادل خوبی نشون دادی.';
+    document.getElementById('resultTag').textContent = msg;
+  }
+
+  /* ---------- wiring ---------- */
+  FCDraw.drawFace(document.getElementById('cIntro'), 100, 100, 1, '#DDD3C4', 'neutral');
+  (function(){
+    var svg = document.getElementById('mechSvg');
+    FCDraw.drawMagnifier(svg, 70, 70, 1, COOL);
+    FCDraw.drawEyePatch(svg, 145, 140, 1, WARM2);
+    var g = FCDraw.rc(svg);
+    svg.appendChild(g.line(20,150,60,150,{stroke:COOL,strokeWidth:2,roughness:1.5}));
+    svg.appendChild(g.line(150,40,185,40,{stroke:WARM,strokeWidth:2,roughness:1.5}));
+  })();
+
+  var engine = FCScene.init({
+    sceneSelector: '.scene',
+    dotsSelector: '#dots',
+    prevBtnId: 'prevBtn',
+    nextBtnId: 'nextBtn',
+    finishLabel: 'دوباره از اول',
+    onFinish: function(){ location.reload(); },
+    onEnter: function(i, name){
+      if (name === 'round-1') initRound(1);
+      if (name === 'round-2') initRound(2);
+      if (name === 'round-3') initRound(3);
+      if (name === 'reveal') renderReveal();
+      if (name === 'cycle') { setupCycle(); FCDraw.drawCycleArrows(document.getElementById('cycleSvg'), 6, WARM); }
+      if (name === 'prior') renderPrior();
+      if (name === 'summary'){ drawSummary(); showResult(); }
+    }
+  });
+
+  document.getElementById('introNext').addEventListener('click', function(){ engine.goto(engine.current()+1); });
+  updateMeter();
+})();
+
+</script>
+</body>
+</html>

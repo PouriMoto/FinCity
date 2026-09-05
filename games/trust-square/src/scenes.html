@@ -1,0 +1,152 @@
+<div class="app" data-title="میدان اعتماد · بازار، شریک‌ها و آدم‌های تکرارگر">
+  <a class="back" href="../../dashboard.html">← بازگشت به داشبورد</a>
+
+  <div class="meter-wrap">
+    <div class="meter-labels"><span>💔 بی‌اعتمادی</span><span>🤝 اعتماد بازار</span></div>
+    <div class="meter-bar"><svg id="meterSvg"></svg><div class="meter-fill" id="meterFill"></div></div>
+    <div class="meter-tag"><span id="meterTag">اعتماد بازار: ۵۰٪</span><span class="coin-chip" id="coinChip">🪙 ۰</span></div>
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <div class="stage" id="stage">
+
+    <!-- Scene 0: intro -->
+    <section class="scene active" data-scene="intro">
+      <h2 class="scene-title">میدان اعتماد</h2>
+      <p class="scene-sub">تو یه مغازه‌ی تازه‌کار تو بازاری. سه جور شریک معامله اینجا هست.</p>
+      <div class="char-intro-grid">
+        <div class="char-card"><svg id="cCooperate" viewBox="0 0 200 200"></svg><h3>صادق همیشگی</h3><p>هر دفعه صادقانه معامله می‌کنه، هرچی تو بکنی.</p></div>
+        <div class="char-card"><svg id="cCheat" viewBox="0 0 200 200"></svg><h3>کلاه‌بردار همیشگی</h3><p>هر دفعه سعی می‌کنه کلاهت بذاره.</p></div>
+        <div class="char-card"><svg id="cCopy" viewBox="0 0 200 200"></svg><h3>تکرارگر</h3><p>دفعه‌ی اول صادقه؛ بعدش دقیقاً کاری که تو باهاش کردی رو تکرار می‌کنه.</p></div>
+      </div>
+      <p class="caption">این سه‌تا، هر روز تو بازار واقعی هم هستن. بیا ببینیم با هرکدوم چطور پیش می‌ره.</p>
+      <div class="row-center"><button class="btn warm" id="introNext">بریم سراغ بازار</button></div>
+    </section>
+
+    <!-- Scene 1: payoff rules -->
+    <section class="scene" data-scene="rules">
+      <h2 class="scene-title">قانونِ هر معامله</h2>
+      <p class="scene-sub">هر دور، هم تو هم طرف مقابل یکی از این دو کار رو می‌کنید.</p>
+      <div class="payoff-grid" id="payoffGrid"></div>
+      <p class="caption">اگه هردو صادق باشید، هردو کم ولی مطمئن می‌برید. اگه یکی کلاه بزنه، اون یکی سود کوتاه‌مدت بیشتری می‌بره — ولی اعتماد بازار می‌شکنه.</p>
+    </section>
+
+    <!-- Scene 2: round vs alwaysHonest -->
+    <section class="scene" data-scene="round-honest" data-partner="honest">
+      <h2 class="scene-title">شریک اول: صادق همیشگی</h2>
+      <p class="scene-sub">۳ دور معامله می‌کنید.</p>
+      <div class="round-stage">
+        <div class="round-side"><svg id="roundYouSvg-honest" viewBox="0 0 100 100"></svg><div class="rname">تو</div></div>
+        <div class="round-vs">⇄</div>
+        <div class="round-side"><svg id="roundPartnerSvg-honest" viewBox="0 0 100 100"></svg><div class="rname">صادق همیشگی</div></div>
+      </div>
+      <div class="round-dots" id="roundDots-honest"></div>
+      <div class="round-choice-row">
+        <button class="btn cool" data-move="honest">🤝 صادق باش</button>
+        <button class="btn warm" data-move="cheat">🃏 کلاه بردار</button>
+      </div>
+      <div class="round-result" id="roundResult-honest">تصمیمت رو بزن.</div>
+      <div class="round-tally" id="roundTally-honest"></div>
+    </section>
+
+    <!-- Scene 3: round vs alwaysCheat -->
+    <section class="scene" data-scene="round-cheat" data-partner="cheat">
+      <h2 class="scene-title">شریک دوم: کلاه‌بردار همیشگی</h2>
+      <p class="scene-sub">۳ دور معامله می‌کنید.</p>
+      <div class="round-stage">
+        <div class="round-side"><svg id="roundYouSvg-cheat" viewBox="0 0 100 100"></svg><div class="rname">تو</div></div>
+        <div class="round-vs">⇄</div>
+        <div class="round-side"><svg id="roundPartnerSvg-cheat" viewBox="0 0 100 100"></svg><div class="rname">کلاه‌بردار همیشگی</div></div>
+      </div>
+      <div class="round-dots" id="roundDots-cheat"></div>
+      <div class="round-choice-row">
+        <button class="btn cool" data-move="honest">🤝 صادق باش</button>
+        <button class="btn warm" data-move="cheat">🃏 کلاه بردار</button>
+      </div>
+      <div class="round-result" id="roundResult-cheat">تصمیمت رو بزن.</div>
+      <div class="round-tally" id="roundTally-cheat"></div>
+    </section>
+
+    <!-- Scene 4: round vs copycat -->
+    <section class="scene" data-scene="round-copy" data-partner="copy">
+      <h2 class="scene-title">شریک سوم: تکرارگر</h2>
+      <p class="scene-sub">۵ دور. اولین حرکتش صادقانه‌ست؛ بعدش دقیقاً همون کاری که تو دور قبل کردی رو تکرار می‌کنه.</p>
+      <div class="round-stage">
+        <div class="round-side"><svg id="roundYouSvg-copy" viewBox="0 0 100 100"></svg><div class="rname">تو</div></div>
+        <div class="round-vs">⇄</div>
+        <div class="round-side"><svg id="roundPartnerSvg-copy" viewBox="0 0 100 100"></svg><div class="rname">تکرارگر</div></div>
+      </div>
+      <div class="round-dots" id="roundDots-copy"></div>
+      <div class="round-choice-row">
+        <button class="btn cool" data-move="honest">🤝 صادق باش</button>
+        <button class="btn warm" data-move="cheat">🃏 کلاه بردار</button>
+      </div>
+      <div class="round-result" id="roundResult-copy">تصمیمت رو بزن.</div>
+      <div class="round-tally" id="roundTally-copy"></div>
+    </section>
+
+    <!-- Scene 5: cycle -->
+    <section class="scene" data-scene="cycle">
+      <h2 class="scene-title">چرخه‌ای که خودش رو تکرار می‌کنه</h2>
+      <p class="scene-sub">روی هر مرحله بزن.</p>
+      <div class="cycle-wrap" id="cycle">
+        <svg class="arrows" id="cycleSvg" viewBox="0 0 100 100"></svg>
+        <div class="cycle-node" data-i="0"><div class="pt"></div><p>یکی یه‌بار کلاه می‌زنه</p></div>
+        <div class="cycle-node" data-i="1"><div class="pt"></div><p>طرف مقابل ضررش رو می‌فهمه</p></div>
+        <div class="cycle-node" data-i="2"><div class="pt"></div><p>اعتماد بین دوطرف می‌شکنه</p></div>
+        <div class="cycle-node" data-i="3"><div class="pt"></div><p>دفعه‌ی بعد، اون هم تلافی می‌کنه</p></div>
+        <div class="cycle-node" data-i="4"><div class="pt"></div><p>هیچ‌کدوم ریسک همکاری نمی‌کنن</p></div>
+        <div class="cycle-node" data-i="5"><div class="pt"></div><p>کل بازار محتاط و کم‌سود می‌مونه</p></div>
+      </div>
+      <div class="cycle-detail" id="cycleDetail">برای دیدنِ توضیح، روی یکی از مرحله‌ها بزن.</div>
+    </section>
+
+    <!-- Scene 6: shadow of the future -->
+    <section class="scene" data-scene="shadow">
+      <h2 class="scene-title">سایه‌ی آینده</h2>
+      <p class="scene-sub">چقدر احتمال داره دوباره با همین شریک معامله کنی؟</p>
+      <input type="range" id="futureSlider" min="0" max="100" value="50">
+      <div class="slider-value" id="futureLabel">۵۰٪ احتمالِ دیدارِ دوباره</div>
+      <div class="friction-bar-wrap">
+        <div class="friction-bar"><div class="friction-fill" id="futureFill"></div></div>
+        <div class="friction-label" id="futureCaption">با این احتمال، صداقت و کلاه‌برداری تقریباً هم‌ارزن.</div>
+      </div>
+      <p class="caption">وقتی احتمال دیدارِ دوباره کم باشه (مثلاً یه معامله‌ی یک‌باره)، وسوسه‌ی کلاه‌زدن بیشتره. وقتی مطمئنی بازم همو می‌بینید، صداقت به‌صرفه‌تر می‌شه — دقیقاً همون چیزی که یه کسب‌وکار محلی رو از یه فروشنده‌ی دوره‌گرد متفاوت می‌کنه.</p>
+    </section>
+
+    <!-- Scene 7: apply to real life -->
+    <section class="scene" data-scene="apply">
+      <h2 class="scene-title">حالا بیارش تو دنیای واقعی</h2>
+      <div class="try-real">
+        <p>یه رابطه‌ی کاری واقعی که اعتماد توش مهمه رو بنویس:</p>
+        <input type="text" id="realPartner" placeholder="مثلاً: تامین‌کننده‌ی جنسم">
+        <div class="row-center"><button class="btn cool" id="realBtn">پیشنهاد رو نشونم بده</button></div>
+        <div class="real-suggestion" id="realSuggestion"></div>
+      </div>
+    </section>
+
+    <!-- Scene 8: summary -->
+    <section class="scene" data-scene="summary">
+      <h2 class="scene-title">نتیجه‌ی روزِ بازار</h2>
+      <div class="stage-visual" id="visSummary" style="max-width:200px;"><svg id="svgSummary" viewBox="0 0 200 200"></svg></div>
+      <div class="result-tag" id="resultTag"></div>
+      <ul class="summary-list">
+        <li><span class="chk">✓</span> با صداقت شروع کن</li>
+        <li><span class="chk">✓</span> رفتار طرف مقابل رو تلافی کن، نه بیشتر</li>
+        <li><span class="chk">✓</span> بعد از یک اشتباه، ببخش و دوباره اعتماد کن</li>
+        <li><span class="chk">✓</span> به فکر بلندمدت باش، نه سود لحظه‌ای</li>
+      </ul>
+      <div class="row-center" style="margin-top:1rem;">
+        <button class="btn ghost" id="replayBtn">دوباره بازی کن</button>
+      </div>
+      <p class="next-hint">این «میدان اعتماد» بود. دفعه‌ی بعد می‌تونیم درباره‌ی یه موضوع دیگه هم بازی مشابه بسازیم.</p>
+    </section>
+
+  </div>
+
+  <div class="nav-buttons">
+    <button class="btn ghost" id="prevBtn">قبلی</button>
+    <button class="btn" id="nextBtn">بعدی</button>
+  </div>
+</div>

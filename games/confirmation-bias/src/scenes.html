@@ -1,0 +1,143 @@
+<div class="app" data-title="سوگیری تاییدی · دنبال چی می‌گردی؟">
+  <a class="back" href="../../dashboard.html">← بازگشت به داشبورد</a>
+
+  <div class="meter-wrap">
+    <div class="meter-labels"><span>🔍 واقع‌بین</span><span>🕶️ فقط چیزی که می‌خوام ببینم</span></div>
+    <div class="meter-bar"><div class="meter-fill" id="meterFill"></div></div>
+    <div class="meter-tag"><span id="meterTag">اطمینان تو: ۵۰٪</span></div>
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <div class="stage" id="stage">
+
+    <!-- 0: intro -->
+    <section class="scene active" data-scene="intro">
+      <h2 class="scene-title">دنبال چی می‌گردی؟</h2>
+      <div class="char-row"><svg id="cIntro" viewBox="0 0 200 200"></svg></div>
+      <p class="scene-sub">دو ماه پیش، شهریار سهام یه شرکت تازه رو خرید. مطمئن بود این سهم رشد می‌کنه.</p>
+      <p class="caption">از اون موقع، هرروز چندتا خبر درباره‌ی این شرکت منتشر می‌شه. شهریار وقت نداره همه‌شون رو بخونه — باید انتخاب کنه کدوم‌ها رو بخونه.</p>
+      <div class="row-center"><button class="btn warm" id="introNext">بیا جای شهریار تصمیم بگیریم</button></div>
+    </section>
+
+    <!-- 1: mechanism -->
+    <section class="scene" data-scene="mechanism">
+      <h2 class="scene-title">مغز ما یه فیلتر داره</h2>
+      <div class="mech-visual"><svg id="mechSvg" viewBox="0 0 200 200"></svg></div>
+      <p class="caption">وقتی از قبل به چیزی باور داری، مغزت ناخودآگاه دنبال شواهدی می‌گرده که همون باور رو تایید کنه — و از کنار شواهد مخالف راحت‌تر رد می‌شه. به این می‌گن «سوگیری تاییدی». تو ۳ دور بعدی، ببین خودت چقدر تحتِ تاثیرشی.</p>
+    </section>
+
+    <!-- 2,3,4: headline rounds -->
+    <section class="scene" data-scene="round-1" data-round="1">
+      <h2 class="scene-title">هفته‌ی اول</h2>
+      <div class="scenario-box">۴ خبر منتشر شده. وقت داری فقط ۲ تا رو بخونی.</div>
+      <div class="headline-grid" id="headlines-1"></div>
+      <div class="pick-counter" id="pickCounter-1">۰ از ۲ خبر انتخاب شد</div>
+      <div class="round-confirm"><button class="btn cool" id="confirmRound-1" disabled>ادامه</button></div>
+    </section>
+
+    <section class="scene" data-scene="round-2" data-round="2">
+      <h2 class="scene-title">هفته‌ی دوم</h2>
+      <div class="scenario-box">باز هم ۴ خبر جدید. باز هم فقط وقت ۲ تا رو داری.</div>
+      <div class="headline-grid" id="headlines-2"></div>
+      <div class="pick-counter" id="pickCounter-2">۰ از ۲ خبر انتخاب شد</div>
+      <div class="round-confirm"><button class="btn cool" id="confirmRound-2" disabled>ادامه</button></div>
+    </section>
+
+    <section class="scene" data-scene="round-3" data-round="3">
+      <h2 class="scene-title">هفته‌ی سوم</h2>
+      <div class="scenario-box">آخرین دور. همون قانون: ۲ خبر از ۴ تا.</div>
+      <div class="headline-grid" id="headlines-3"></div>
+      <div class="pick-counter" id="pickCounter-3">۰ از ۲ خبر انتخاب شد</div>
+      <div class="round-confirm"><button class="btn cool" id="confirmRound-3" disabled>ادامه</button></div>
+    </section>
+
+    <!-- 5: reveal gap -->
+    <section class="scene" data-scene="reveal">
+      <h2 class="scene-title">حالا بیا مقایسه کنیم</h2>
+      <p class="scene-sub">اینم دو عدد: چقدر مطمئن بودی، در برابر واقعیتی که همون موقع داشت اتفاق می‌افتاد.</p>
+      <div class="reveal-bars">
+        <div class="reveal-col">
+          <div class="reveal-track"><div class="reveal-fill confidence" id="fillConfidence" style="height:50%;"></div></div>
+          <div class="reveal-label">اطمینان تو</div>
+          <div class="reveal-value" id="valConfidence">۵۰٪</div>
+        </div>
+        <div class="reveal-col">
+          <div class="reveal-track"><div class="reveal-fill truth" id="fillTruth" style="height:50%;"></div></div>
+          <div class="reveal-label">وضعیت واقعی شرکت</div>
+          <div class="reveal-value" id="valTruth">۵۰٪</div>
+        </div>
+      </div>
+      <div class="gap-note" id="gapNote">—</div>
+    </section>
+
+    <!-- 6: cycle -->
+    <section class="scene" data-scene="cycle">
+      <h2 class="scene-title">چرخه‌ای که خودش رو تقویت می‌کنه</h2>
+      <p class="scene-sub">روی هر مرحله بزن.</p>
+      <div class="cycle-wrap" id="cycle">
+        <svg class="arrows" id="cycleSvg" viewBox="0 0 100 100"></svg>
+        <div class="cycle-node" data-i="0"><div class="pt"></div><p>یه باور اولیه داری</p></div>
+        <div class="cycle-node" data-i="1"><div class="pt"></div><p>ناخودآگاه دنبال خبر هم‌راستا می‌گردی</p></div>
+        <div class="cycle-node" data-i="2"><div class="pt"></div><p>خبر مخالف رو کم‌اهمیت می‌بینی یا رد می‌کنی</p></div>
+        <div class="cycle-node" data-i="3"><div class="pt"></div><p>باورت قوی‌تر می‌شه</p></div>
+        <div class="cycle-node" data-i="4"><div class="pt"></div><p>حالا مطمئن‌تر دنبال تاییدِ بیشتر می‌گردی</p></div>
+        <div class="cycle-node" data-i="5"><div class="pt"></div><p>فاصله‌ی بین باور و واقعیت بیشتر می‌شه</p></div>
+      </div>
+      <div class="cycle-detail" id="cycleDetail">برای دیدنِ توضیح، روی یکی از مرحله‌ها بزن.</div>
+    </section>
+
+    <!-- 7: slider -->
+    <section class="scene" data-scene="prior">
+      <h2 class="scene-title">هرچی باورت قوی‌تر باشه...</h2>
+      <p class="scene-sub">قبل از این ماجرا، چقدر به این شرکت باور داشتی؟</p>
+      <input type="range" id="priorSlider" min="0" max="100" value="50">
+      <div class="slider-value" id="priorLabel">۵۰٪ باور اولیه</div>
+      <div class="friction-bar-wrap">
+        <div class="friction-bar"><div class="friction-fill" id="priorFill"></div></div>
+        <div class="friction-label" id="priorCaption">—</div>
+      </div>
+      <p class="caption">هرچی باور اولیه قوی‌تر باشه، فیلترِ ذهنی هم قوی‌تر کار می‌کنه — و متوجه نمی‌شی داری فیلتر می‌کنی. برای همینه که آدم‌های باتجربه هم گاهی همین اشتباه رو می‌کنن؛ تجربه، باور رو قوی‌تر می‌کنه، نه لزوماً دقیق‌تر.</p>
+    </section>
+
+    <!-- 8: life mirror -->
+    <section class="scene" data-scene="mirror">
+      <h2 class="scene-title">همین اتفاق با آدم‌ها هم می‌افته</h2>
+      <div class="mirror-box">
+        <p>یه همکار جدید اومده که از همون روز اول ازش خوشت اومده. این هفته یه اشتباه بزرگ کرد. با خودت چی می‌گی؟</p>
+        <div class="mirror-choices">
+          <button class="btn cool" data-choice="excuse">«حتماً یه دلیلی داشته، آدم خوبیه»</button>
+          <button class="btn warm" data-choice="doubt">«خب، شاید اولین تصورم اشتباه بوده»</button>
+        </div>
+        <div class="mirror-feedback" id="mirrorFeedback"></div>
+      </div>
+      <div class="try-real">
+        <p>یه باوری که این روزها داری (درباره‌ی یه آدم، یه سرمایه‌گذاری، یا یه تصمیم) و شاید فقط دنبال تاییدشی رو بنویس:</p>
+        <input type="text" id="realBelief" placeholder="مثلاً: مطمئنم این تامین‌کننده قابل‌اعتماده">
+        <div class="row-center"><button class="btn cool" id="realBtn">یه سؤال چالشی بهم بده</button></div>
+        <div class="real-suggestion" id="realSuggestion"></div>
+      </div>
+    </section>
+
+    <!-- 9: summary -->
+    <section class="scene" data-scene="summary">
+      <h2 class="scene-title">جمع‌بندی</h2>
+      <div class="mech-visual" style="max-width:180px;"><svg id="svgSummary" viewBox="0 0 200 200"></svg></div>
+      <div class="result-tag" id="resultTag"></div>
+      <ul class="summary-list">
+        <li><span class="chk">✓</span> قبل از تصمیم مهم، عمداً دنبال یه خبر بد بگرد</li>
+        <li><span class="chk">✓</span> از خودت بپرس: «چه چیزی می‌تونه نظرمو عوض کنه؟»</li>
+        <li><span class="chk">✓</span> به کسی که مخالف نظرته، واقعاً گوش بده</li>
+        <li><span class="chk">✓</span> بین «امیدوارم درست باشه» و «مطمئنم درسته» فرق بذار</li>
+      </ul>
+      <div class="row-center" style="margin-top:1rem;"><button class="btn ghost" id="replayBtn">دوباره بازی کن</button></div>
+      <p class="next-hint">این «سوگیری تاییدی» بود. بازی بعدی می‌تونه یه سوگیری دیگه باشه.</p>
+    </section>
+
+  </div>
+
+  <div class="nav-buttons">
+    <button class="btn ghost" id="prevBtn">قبلی</button>
+    <button class="btn" id="nextBtn">بعدی</button>
+  </div>
+</div>

@@ -1,0 +1,77 @@
+/*
+  wizard-styles.css — استایل مشترک ویزارد داستان
+  هر بازی این فایل رو با یک <link> اضافه می‌کنه و رنگ‌های خودش رو
+  از طریق CSS variableهای زیر بازنویسی می‌کنه (که هر بازی از قبل تعریف کرده):
+  --card, --ink, --ink-soft, --line, --gold, --gold-deep
+*/
+
+.wizard-screen{ display:none; }
+.wizard-screen.active{ display:block; }
+
+.wizard-image{
+  width:100%;
+  aspect-ratio:4/3;
+  max-height:320px;
+  border-radius:18px;
+  overflow:hidden;
+  position:relative;
+  background:#efe6cf;
+  border:1.5px dashed var(--line, #ddd0ab);
+  margin-bottom:1.1rem;
+}
+.wizard-image img{ width:100%; height:100%; object-fit:cover; display:block; }
+.wizard-image .placeholder{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:.4rem;
+  color:var(--ink-soft, #5c5240); font-size:.78rem; text-align:center; padding:1rem;
+}
+.wizard-image .placeholder .icon{ font-size:2.4rem; }
+.wizard-image .placeholder code{
+  background:#fff; padding:.1rem .5rem; border-radius:6px; font-size:.72rem; direction:ltr; display:inline-block;
+}
+
+.wizard-audio-btn{
+  display:block; margin:0 auto 1rem; background:#fff;
+  border:1.5px solid var(--line, #ddd0ab); border-radius:30px;
+  padding:.4rem 1.1rem; font-family:inherit; font-weight:700; font-size:.82rem;
+  color:var(--ink-soft, #5c5240); cursor:pointer;
+}
+.wizard-audio-btn:hover{ background:#f5efdd; }
+
+.wizard-text{
+  font-size:1.05rem; line-height:2; text-align:center; margin-bottom:1.3rem;
+  color:var(--ink, #211a10);
+}
+
+.wizard-guess{
+  display:flex; gap:.6rem; justify-content:center; align-items:center;
+  margin-bottom:1.3rem; flex-wrap:wrap;
+}
+.wizard-guess input{
+  width:6rem; text-align:center; font-family:inherit; font-size:1.15rem; font-weight:800;
+  padding:.5rem; border-radius:10px; border:1.5px solid var(--line, #ddd0ab);
+  color:var(--gold-deep, #8a6a1f);
+}
+.wizard-guess span{ font-size:.9rem; color:var(--ink-soft, #5c5240); font-weight:600; }
+
+.wizard-choice-btn{
+  background:#fff; border:1.5px solid var(--line, #ddd0ab); border-radius:14px;
+  padding:.6rem 1rem; font-family:inherit; font-weight:700; font-size:.88rem;
+  color:var(--ink, #211a10); cursor:pointer;
+}
+.wizard-choice-btn.selected{
+  background:var(--gold, #c1922f); color:#fff; border-color:var(--gold-deep, #8a6a1f);
+}
+
+.wizard-nav{ display:flex; justify-content:space-between; align-items:center; gap:.8rem; }
+.wizard-dots{ display:flex; gap:.4rem; }
+.wizard-dot{ width:.5rem; height:.5rem; border-radius:50%; background:#ddd0ab; transition:background .2s; }
+.wizard-dot.active{ background:var(--gold-deep, #8a6a1f); }
+
+.wizard-btn{
+  background:linear-gradient(135deg, var(--gold, #c1922f), var(--gold-deep, #8a6a1f));
+  color:#fff; border:none; border-radius:30px; padding:.65rem 1.5rem;
+  font-family:inherit; font-weight:700; font-size:.9rem; cursor:pointer;
+}
+.wizard-btn.ghost{ background:transparent; color:var(--ink-soft, #5c5240); padding:.65rem .8rem; }
+.wizard-btn:disabled{ opacity:.3; cursor:not-allowed; }

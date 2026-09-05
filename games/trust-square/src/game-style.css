@@ -1,0 +1,35 @@
+/* استایل مخصوص «میدان اعتماد» — کلاس‌های عمومی در shared-src/paper-theme.css هستند */
+
+.meter-bar svg{position:absolute; inset:0; width:100%; height:100%;}
+.meter-fill{ background:var(--cool-2); opacity:.55; }
+.friction-fill{ background:var(--cool); }
+
+.stage-visual{position:relative; width:100%; max-width:320px; margin:0 auto; aspect-ratio:1/1;}
+.stage-visual svg{position:absolute; inset:0; width:100%; height:100%;}
+
+/* کارت‌های معرفی شخصیت — کلاس مشترک char-intro-grid/char-card حالا در shared-src/paper-theme.css است */
+
+/* جدول سود/ضرر */
+.payoff-grid{display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-top:1rem;}
+.payoff-cell{background:var(--paper); border-radius:12px; padding:.7rem; text-align:center;}
+.payoff-cell svg{width:60px; height:30px; margin:0 auto .3rem;}
+.payoff-cell .pt{font-size:.82rem; font-weight:700;}
+.payoff-cell .ps{font-size:.75rem; color:var(--ink-soft);}
+
+/* صحنه‌ی دور معامله */
+.round-dots{display:flex; justify-content:center; gap:.3rem; margin:.6rem 0;}
+.round-dot{width:9px; height:9px; border-radius:2px; background:var(--paper);}
+.round-dot.cooperate{background:var(--cool);}
+.round-dot.cheat{background:var(--warm);}
+.round-stage{display:flex; justify-content:space-around; align-items:center; margin:.8rem 0;}
+.round-side{text-align:center; flex:1;}
+.round-side svg{width:90px; height:90px;}
+.round-side .rname{font-size:.8rem; font-weight:700; margin-top:.2rem;}
+.round-vs{font-size:1.4rem; color:var(--pencil); font-weight:800;}
+.round-choice-row{display:flex; gap:.7rem; justify-content:center; margin-top:.6rem;}
+.round-choice-row .btn{flex:1; max-width:160px;}
+.round-result{
+  min-height:3.2rem; text-align:center; font-size:.88rem; font-weight:600;
+  background:var(--paper); border-radius:10px; padding:.6rem .8rem; margin-top:.8rem;
+}
+.round-tally{text-align:center; font-size:.8rem; color:var(--ink-soft); margin-top:.4rem;}
